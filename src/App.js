@@ -36,7 +36,7 @@ function App() {
     },
     {
       path: '/electrical-equipment',
-      element: <div>Electrical Equipment Page</div>,
+      element: <ElectricalEquipmentPage/>,
     },
     {
       path: '*',
