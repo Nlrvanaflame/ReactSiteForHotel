@@ -80,6 +80,18 @@ const FurniturePage = () => {
     }
   };
 
+  const handleDelete = async(id)=>{
+    try {
+      // Send the delete request to the backend
+      await axios.delete(`http://localhost:4000/furniture/${id}`);
+
+      // Update the furniture state to remove the deleted furniture
+      setFurniture((prevFurniture) => prevFurniture.filter((item) => item.id !== id));
+    } catch (error) {
+      console.log('Error deleting furniture:', error);
+    }
+  }
+
   const handleSubmit = async (event) => {
     event.preventDefault();
 
@@ -132,6 +144,7 @@ const FurniturePage = () => {
           <li key={item.id}>
             <p>Name: {item.name}</p>
             <p>Room ID: {item.roomId}</p>
+            <button onClick={() => handleDelete(item.id)}>Delete</button>          
           </li>
         ))}
       </ul>
