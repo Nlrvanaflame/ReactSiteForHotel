@@ -56,28 +56,36 @@ const FurniturePage = () => {
 
   //Functions for name,id change and submit
 
+  const validateForm = () => {
+    let valid = true;
+    if (!name.trim()) {
+      setNameError('Name is required');
+      valid = false;
+    } else {
+      setNameError('');
+    }
+
+    if (!roomId.trim() && name.trim()) {
+      setRoomIdError('Room ID is required');
+      valid = false;
+    } else {
+      setRoomIdError('');
+    }
+
+    return valid;
+  };
+
+
   const handleNameChange = (event) => {
     const value = event.target.value;
     setName(value);
 
-  
-    if (!value.trim()) {
-      setNameError('Name is required.');
-    } else {
-      setNameError('');
-    }
   };
 
   const handleRoomIdChange = (event) => {
     const value = event.target.value;
     setRoomId(value);
 
-    
-    if (!value.trim()) {
-      setRoomIdError('Room ID is required.');
-    } else {
-      setRoomIdError('');
-    }
   };
 
   const handleDelete = async(id)=>{
@@ -94,24 +102,9 @@ const FurniturePage = () => {
 
   const handleSubmit = async (event) => {
     event.preventDefault();
-
-
   
-
     
-    if (!name.trim()) {
-      setNameError('Name is required.');
-      return;
-    }
-
-  
-    if (!roomId.trim()) {
-      setRoomIdError('Room ID is required.');
-      return;
-    }
-
-      
-
+    if (validateForm()){
     try {
      
       await axios.post('http://localhost:4000/furniture/', { name, roomId });
@@ -121,6 +114,7 @@ const FurniturePage = () => {
     } catch (error) {
       console.error('Error adding furniture:', error);
     }
+  }
   };
 
 
