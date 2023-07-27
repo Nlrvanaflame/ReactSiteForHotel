@@ -9,6 +9,8 @@ const FurniturePage = () => {
   const [furniture, setFurniture] = useState([]);
   const [error, setError] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [rooms, setRooms] = useState([]);
+  const [selectedRoomId, setSelectedRoomId] = useState('');
 
   //Modal State
   const [showModal, setShowModal] = useState(false);
@@ -33,15 +35,23 @@ const FurniturePage = () => {
       }
       setLoading(false);
     };
+
+
+    const fetchRooms = async () => {
+      try {
+        console.log('Fetching rooms...');
+        const response = await axios.get('http://localhost:4000/rooms/');
+        console.log('Fetched rooms:', response.data);
+        setRooms(response.data);
+      } catch (error) {
+        console.log('Error fetching rooms:', error);
+        setError(error);
+      }
+    };
     
     fetchData();
+    fetchRooms();
   }, []);
-
-
-  // const toggleModal = () => {
-  //   setShowModal(!showModal);
-  // };
-  // Function to open the modal
 
 
   const handleOpenModal = () => {
@@ -56,6 +66,9 @@ const FurniturePage = () => {
 
   //Functions for name,id change and submit
 
+
+  
+
   const validateForm = () => {
     let valid = true;
     if (!name.trim()) {
@@ -65,12 +78,21 @@ const FurniturePage = () => {
       setNameError('');
     }
 
-    if (!roomId.trim() && name.trim()) {
-      setRoomIdError('Room ID is required');
-      valid = false;
-    } else {
-      setRoomIdError('');
+    if (selectedRoomId.length===0){
+      setRoomIdError("Please select a room")
     }
+    else {
+      setRoomIdError('')
+    }
+
+
+    // if (!roomId.trim() && name.trim()) {
+    //   setRoomIdError('Room ID is required');
+    //   valid = false;
+    // } else {
+    //   setRoomIdError('');
+    // }
+    
 
     return valid;
   };
@@ -82,10 +104,16 @@ const FurniturePage = () => {
 
   };
 
-  const handleRoomIdChange = (event) => {
-    const value = event.target.value;
-    setRoomId(value);
+  // const handleRoomIdChange = (event) => {
+  //   const value = event.target.value;
+  //   // setRoomId(value);
+  //   setSelectedRoomId(value);
 
+  // };
+
+  const handleRoomChange = (event) => {
+    const value = event.target.value;
+    setSelectedRoomId(value);
   };
 
   const handleDelete = async(id)=>{
@@ -104,10 +132,22 @@ const FurniturePage = () => {
     event.preventDefault();
   
     
-    if (validateForm()){
+    if (validateForm() && selectedRoomId){
+
+      // try {
+      //   const response = await axios.get(`http://localhost:4000/rooms`);
+      //   if (!response.data) {
+      //     setRoomIdError('Room ID does not exist');
+      //     return;
+      //   }
+      // } catch (error) {
+      //   console.log('Error checking roomId:', error);
+      //   return;
+      // }
+      
     try {
      
-      await axios.post('http://localhost:4000/furniture/', { name, roomId });
+      await axios.post('http://localhost:4000/furniture/', { name, roomId:selectedRoomId });
       // Close the modal after successful submission
       setShowModal(false);
       window.location.reload();
@@ -152,9 +192,11 @@ const FurniturePage = () => {
           isOpen={showModal}
           onClose={handleCloseModal}
           name={name}
+          selectedRoomId={selectedRoomId}
+          rooms={rooms}
           roomId={roomId}
           handleNameChange={handleNameChange}
-          handleRoomIdChange={handleRoomIdChange}
+          handleRoomChange={handleRoomChange}
           handleSubmit={handleSubmit}
           nameError={nameError}
           roomIdError={roomIdError}
