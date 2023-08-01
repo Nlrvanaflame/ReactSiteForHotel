@@ -10,7 +10,7 @@ const FurniturePage = () => {
   const [error, setError] = useState(null);
   const [loading, setLoading] = useState(true);
   const [rooms, setRooms] = useState([]);
-  const [selectedRoomId, setSelectedRoomId] = useState('');
+  const [selectedId, setSelectedId] = useState('');
 
   //Modal State
   const [showModal, setShowModal] = useState(false);
@@ -78,7 +78,7 @@ const FurniturePage = () => {
       setNameError('');
     }
 
-    if (selectedRoomId.length===0){
+    if (selectedId.length===0){
       setRoomIdError("Please select a room")
     }
     else {
@@ -107,13 +107,13 @@ const FurniturePage = () => {
   // const handleRoomIdChange = (event) => {
   //   const value = event.target.value;
   //   // setRoomId(value);
-  //   setSelectedRoomId(value);
+  //   setSelectedId(value);
 
   // };
 
   const handleRoomChange = (event) => {
     const value = event.target.value;
-    setSelectedRoomId(value);
+    setSelectedId(value);
   };
 
   const handleDelete = async(id)=>{
@@ -132,12 +132,12 @@ const FurniturePage = () => {
     event.preventDefault();
   
     
-    if (validateForm() && selectedRoomId){
+    if (validateForm() && selectedId){
 
       
     try {
      
-      await axios.post('http://localhost:4000/furniture/', { name, roomId:selectedRoomId });
+      await axios.post('http://localhost:4000/furniture/', { name, roomId:selectedId });
       // Close the modal after successful submission
       setShowModal(false);
       window.location.reload();
@@ -168,7 +168,7 @@ const FurniturePage = () => {
             {furniture.map((item) => (
               <li key={item.id}>
                 <p>Name: {item.name}</p>
-                <p>Room ID: {item.roomId}</p>
+                <p>Room Name: {item.Room.name}</p>
                 <button onClick={() => handleDelete(item.id)}>Delete</button>
               </li>
             ))}
@@ -186,7 +186,7 @@ const FurniturePage = () => {
           isOpen={showModal}
           onClose={handleCloseModal}
           name={name}
-          selectedRoomId={selectedRoomId}
+          selectedId={selectedId}
           rooms={rooms}
           roomId={roomId}
           handleNameChange={handleNameChange}

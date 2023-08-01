@@ -1,6 +1,6 @@
 import React from 'react';
 
-const Modal = ({ isOpen, onClose, name, selectedRoomId, rooms, handleNameChange, handleRoomChange, handleSubmit, nameError, roomIdError }) => {
+const Modal = ({ isOpen, onClose, name, selectedId, rooms, handleNameChange, handleRoomChange, handleSubmit, nameError, roomIdError }) => {
   if (!isOpen) {
     return null;
   }
@@ -18,7 +18,7 @@ const Modal = ({ isOpen, onClose, name, selectedRoomId, rooms, handleNameChange,
         {/* New select element for choosing the room */}
         <label>
           Room:
-          <select value={selectedRoomId} onChange={handleRoomChange}>
+          <select value={selectedId} onChange={handleRoomChange}>
             <option value="">Select a room</option>
             {rooms.map((room) => (
               <option key={room.id} value={room.id}>
