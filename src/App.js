@@ -1,9 +1,11 @@
 import React from 'react';
-import HomePage from './components/HomePage';
 import ElectricalEquipmentPage from './components/ElectricalEquipmentPage';
 import FurniturePage from './components/FurniturePage';
 import NotFoundPage from './components/NotFoundPage';
 import Navigation from './components/Navigation';
+import RoomPage from './components/RoomPage'
+import ApartmentPage from './components/ApartmentPage'
+import FloorPage from './components/FloorPage'
 import {
   createBrowserRouter,
   RouterProvider,
@@ -42,6 +44,19 @@ function App() {
       path: '*',
       element: <NotFoundPage />,
     },
+    {
+      path: '/rooms',
+      element: <RoomPage/>
+    },
+    {
+      path: '/apartments',
+      element: <ApartmentPage/>
+    },
+    {
+      path: '/floors',
+      element: <FloorPage/>
+    }
+
   ];
 
 

@@ -134,16 +134,6 @@ const FurniturePage = () => {
     
     if (validateForm() && selectedRoomId){
 
-      // try {
-      //   const response = await axios.get(`http://localhost:4000/rooms`);
-      //   if (!response.data) {
-      //     setRoomIdError('Room ID does not exist');
-      //     return;
-      //   }
-      // } catch (error) {
-      //   console.log('Error checking roomId:', error);
-      //   return;
-      // }
       
     try {
      
@@ -172,19 +162,23 @@ const FurniturePage = () => {
     return (
     <div>
       <h2>Furniture Page</h2>
-      <ul>
-        {console.log('Furniture:', furniture)}
-        {furniture.map(item => (
-          <li key={item.id}>
-            <p>Name: {item.name}</p>
-            <p>Room ID: {item.roomId}</p>
-            <button onClick={() => handleDelete(item.id)}>Delete</button>          
-          </li>
-        ))}
-      </ul>
+      {rooms.length > 0 ? (
+        <div>
+          <ul>
+            {furniture.map((item) => (
+              <li key={item.id}>
+                <p>Name: {item.name}</p>
+                <p>Room ID: {item.roomId}</p>
+                <button onClick={() => handleDelete(item.id)}>Delete</button>
+              </li>
+            ))}
+          </ul>
+          <button onClick={handleOpenModal}>Add Furniture</button>
+        </div>
+      ) : (
+        <p>No existing rooms. Please create a room first.</p>
+      )}
 
-      {/* Add a button to open the modal */}
-      <button onClick={handleOpenModal}>Add Furniture</button>
 
       {/* Render the Modal component conditionally */}
       {showModal && (
