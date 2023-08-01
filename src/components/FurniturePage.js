@@ -9,7 +9,7 @@ const FurniturePage = () => {
   const [furniture, setFurniture] = useState([]);
   const [error, setError] = useState(null);
   const [loading, setLoading] = useState(true);
-  const [rooms, setRooms] = useState([]);
+  const [fields, setfields] = useState([]);
   const [selectedId, setSelectedId] = useState('');
 
   //Modal State
@@ -17,7 +17,7 @@ const FurniturePage = () => {
   const [name, setName] = useState('');
   const [roomId, setRoomId] = useState('');
   const [nameError, setNameError] = useState('');
-  const [roomIdError, setRoomIdError] = useState('');
+  const [IdError, setIdError] = useState('');
 
   
 
@@ -37,12 +37,12 @@ const FurniturePage = () => {
     };
 
 
-    const fetchRooms = async () => {
+    const fetchfields = async () => {
       try {
         console.log('Fetching rooms...');
         const response = await axios.get('http://localhost:4000/rooms/');
         console.log('Fetched rooms:', response.data);
-        setRooms(response.data);
+        setfields(response.data);
       } catch (error) {
         console.log('Error fetching rooms:', error);
         setError(error);
@@ -50,7 +50,7 @@ const FurniturePage = () => {
     };
     
     fetchData();
-    fetchRooms();
+    fetchfields();
   }, []);
 
 
@@ -79,21 +79,11 @@ const FurniturePage = () => {
     }
 
     if (selectedId.length===0){
-      setRoomIdError("Please select a room")
+      setIdError("Please select a room")
     }
     else {
-      setRoomIdError('')
+      setIdError('')
     }
-
-
-    // if (!roomId.trim() && name.trim()) {
-    //   setRoomIdError('Room ID is required');
-    //   valid = false;
-    // } else {
-    //   setRoomIdError('');
-    // }
-    
-
     return valid;
   };
 
@@ -104,14 +94,9 @@ const FurniturePage = () => {
 
   };
 
-  // const handleRoomIdChange = (event) => {
-  //   const value = event.target.value;
-  //   // setRoomId(value);
-  //   setSelectedId(value);
+ 
 
-  // };
-
-  const handleRoomChange = (event) => {
+  const handleChange = (event) => {
     const value = event.target.value;
     setSelectedId(value);
   };
@@ -133,7 +118,7 @@ const FurniturePage = () => {
   
     
     if (validateForm() && selectedId){
-
+      
       
     try {
      
@@ -162,7 +147,7 @@ const FurniturePage = () => {
     return (
     <div>
       <h2>Furniture Page</h2>
-      {rooms.length > 0 ? (
+      {fields.length > 0 ? (
         <div>
           <ul>
             {furniture.map((item) => (
@@ -176,7 +161,7 @@ const FurniturePage = () => {
           <button onClick={handleOpenModal}>Add Furniture</button>
         </div>
       ) : (
-        <p>No existing rooms. Please create a room first.</p>
+        <p>No existing fields. Please create a room first.</p>
       )}
 
 
@@ -187,13 +172,13 @@ const FurniturePage = () => {
           onClose={handleCloseModal}
           name={name}
           selectedId={selectedId}
-          rooms={rooms}
+          fields={fields}
           roomId={roomId}
           handleNameChange={handleNameChange}
-          handleRoomChange={handleRoomChange}
+          handleChange={handleChange}
           handleSubmit={handleSubmit}
           nameError={nameError}
-          roomIdError={roomIdError}
+          IdError={IdError}
         />
       )}
     </div>

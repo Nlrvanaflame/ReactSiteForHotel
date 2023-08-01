@@ -1,13 +1,13 @@
 import React from 'react';
 
-const Modal = ({ isOpen, onClose, name, selectedId, rooms, handleNameChange, handleRoomChange, handleSubmit, nameError, roomIdError }) => {
+const Modal = ({ isOpen, onClose, name, selectedId, fields, handleNameChange, handleChange, handleSubmit, nameError, IdError }) => {
   if (!isOpen) {
     return null;
   }
 
   return (
     <div className="modal">
-      <h2>Add Furniture</h2>
+      <h2>Add </h2>
       <form onSubmit={handleSubmit}>
         <label>
           Name:
@@ -15,19 +15,19 @@ const Modal = ({ isOpen, onClose, name, selectedId, rooms, handleNameChange, han
         </label>
         {nameError && <p className="error">{nameError}</p>}
 
-        {/* New select element for choosing the room */}
+        {/* New select element for choosing the items */}
         <label>
-          Room:
-          <select value={selectedId} onChange={handleRoomChange}>
-            <option value="">Select a room</option>
-            {rooms.map((room) => (
-              <option key={room.id} value={room.id}>
-                {room.name}
+          Placing:
+          <select value={selectedId} onChange={handleChange}>
+            <option value="">Select</option>
+            {fields.map((items) => (
+              <option key={items.id} value={items.id}>
+                {items.name}
               </option>
             ))}
           </select>
         </label>
-        {roomIdError && <p className="error">{roomIdError}</p>}
+        {IdError && <p className="error">{IdError}</p>}
 
         <button type="submit">Submit</button>
         <button type="button" onClick={onClose}>
