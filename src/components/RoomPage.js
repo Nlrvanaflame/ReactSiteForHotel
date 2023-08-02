@@ -153,7 +153,7 @@ const handleNameChange = (event) => {
             {room.map((item) => (
               <li key={item.id}>
                 <p>Name: {item.name}</p>
-                <p>Apartment Name: {item.Apartment.name}</p>
+                <p>Apartment: {item.Apartment.name}</p>
                 <button onClick={() => handleDelete(item.id)}>Delete</button>
               </li>
             ))}

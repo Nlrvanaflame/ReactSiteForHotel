@@ -152,8 +152,8 @@ const FurniturePage = () => {
           <ul>
             {furniture.map((item) => (
               <li key={item.id}>
-                <p>Name: {item.name}</p>
-                <p>Room Name: {item.Room.name}</p>
+                <p>Furniture: {item.name}</p>
+                <p>Room: {item.Room.name}</p>
                 <button onClick={() => handleDelete(item.id)}>Delete</button>
               </li>
             ))}
