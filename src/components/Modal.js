@@ -1,21 +1,44 @@
 import React from 'react';
 
-const Modal = ({ isOpen, onClose, name, selectedId, fields, handleNameChange, handleChange, handleSubmit, nameError, IdError }) => {
+const Modal = ({
+  isOpen,
+  onClose,
+  name,
+  selectedId,
+  fields,
+  handleNameChange,
+  handleChange,
+  handleSubmit,
+  inputs,
+  nameError,
+  IdError,
+  addingFurnitureToRoom,
+}) => {
   if (!isOpen) {
     return null;
   }
 
+  const modalTitle = addingFurnitureToRoom ? 'Add Furniture' : 'Add Room';
+
   return (
     <div className="modal">
-      <h2>Add </h2>
+      <h2> {modalTitle} </h2>
       <form onSubmit={handleSubmit}>
-        <label>
-          Name:
-          <input type="text" value={name} onChange={handleNameChange} />
-        </label>
-        {nameError && <p className="error">{nameError}</p>}
 
-        {/* New select element for choosing the items */}
+
+        {inputs.map(input => {
+          return <>
+            <label>
+              {input.title}:
+              <input type="text" value={input.value} onChange={input.changeValue} />
+            </label>
+
+            {input.error && <p className="error">{input.error}</p>}
+          </>
+        })}
+
+
+
         <label>
           Placing:
           <select value={selectedId} onChange={handleChange}>

@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import axios from "axios";
 import Modal from './Modal';
+import Navigation from './Navigation';
 
 const FloorPage = () => {
   const [floors, setFloors] = useState([]);
@@ -85,6 +86,15 @@ const FloorPage = () => {
     setSelectedId(value);
   };
 
+  const inputs = [
+    {
+      title: "Name",
+      value: name,
+      changeValue: handleNameChange,
+      error: nameError
+    }
+  ]
+
   const handleDelete = async (id) => {
     try {
       // Send the delete request to the backend
@@ -122,9 +132,11 @@ const FloorPage = () => {
 
   return (
     <div>
+      <Navigation />
       <h2>Floor Page</h2>
       {fields.length > 0 ? (
         <div>
+          <button onClick={handleOpenModal}>Add Floor</button>
           <ul>
             {floors.map((item) => (
               <li key={item.id}>
@@ -134,7 +146,7 @@ const FloorPage = () => {
               </li>
             ))}
           </ul>
-          <button onClick={handleOpenModal}>Add Floor</button>
+
         </div>
       ) : (
         <p>No existing hotels. Please create a hotel first.</p>
@@ -154,6 +166,7 @@ const FloorPage = () => {
           handleSubmit={handleSubmit}
           nameError={nameError}
           IdError={IdError}
+          inputs={inputs}
         />
       )}
     </div>

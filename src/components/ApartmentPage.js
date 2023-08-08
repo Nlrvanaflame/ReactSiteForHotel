@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import axios from "axios";
 import Modal from './Modal';
+import Navigation from './Navigation';
 
 const ApartmentPage = () => {
   const [apartments, setApartments] = useState([]);
@@ -42,7 +43,7 @@ const ApartmentPage = () => {
         setError(error);
       }
     };
-    
+
     fetchData();
     fetchFields();
   }, []);
@@ -85,6 +86,15 @@ const ApartmentPage = () => {
     setSelectedId(value);
   };
 
+  const inputs = [
+    {
+      title: "Name",
+      value: name,
+      changeValue: handleNameChange,
+      error: nameError
+    }
+  ]
+
   const handleDelete = async (id) => {
     try {
       // Send the delete request to the backend
@@ -99,7 +109,7 @@ const ApartmentPage = () => {
 
   const handleSubmit = async (event) => {
     event.preventDefault();
-    
+
     if (validateForm() && selectedId) {
       try {
         await axios.post('http://localhost:4000/apartments/', { name, floorId: selectedId });
@@ -122,9 +132,11 @@ const ApartmentPage = () => {
 
   return (
     <div>
+      <Navigation />
       <h2>Apartment Page</h2>
       {fields.length > 0 ? (
         <div>
+          <button onClick={handleOpenModal}>Add Apartment</button>
           <ul>
             {apartments.map((item) => (
               <li key={item.id}>
@@ -134,7 +146,7 @@ const ApartmentPage = () => {
               </li>
             ))}
           </ul>
-          <button onClick={handleOpenModal}>Add Apartment</button>
+
         </div>
       ) : (
         <p>No existing floors. Please create a floor first.</p>
@@ -154,6 +166,7 @@ const ApartmentPage = () => {
           handleSubmit={handleSubmit}
           nameError={nameError}
           IdError={IdError}
+          inputs={inputs}
         />
       )}
     </div>

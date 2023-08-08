@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import axios from "axios";
 import Modal from './Modal';
+import Navigation from './Navigation';
 
 
 
@@ -13,13 +14,14 @@ const FurniturePage = () => {
   const [selectedId, setSelectedId] = useState('');
 
   //Modal State
+  const [model, setModel] = useState('')
   const [showModal, setShowModal] = useState(false);
   const [name, setName] = useState('');
   const [roomId, setRoomId] = useState('');
   const [nameError, setNameError] = useState('');
   const [IdError, setIdError] = useState('');
 
-  
+
 
   useEffect(() => {
     const fetchData = async () => {
@@ -48,7 +50,7 @@ const FurniturePage = () => {
         setError(error);
       }
     };
-    
+
     fetchData();
     fetchfields();
   }, []);
@@ -67,7 +69,7 @@ const FurniturePage = () => {
   //Functions for name,id change and submit
 
 
-  
+
 
   const validateForm = () => {
     let valid = true;
@@ -78,7 +80,7 @@ const FurniturePage = () => {
       setNameError('');
     }
 
-    if (selectedId.length===0){
+    if (selectedId.length === 0) {
       setIdError("Please select a room")
     }
     else {
@@ -87,21 +89,42 @@ const FurniturePage = () => {
     return valid;
   };
 
-
   const handleNameChange = (event) => {
     const value = event.target.value;
     setName(value);
 
   };
 
- 
-
   const handleChange = (event) => {
     const value = event.target.value;
     setSelectedId(value);
   };
 
-  const handleDelete = async(id)=>{
+  const handleModel = (event) => {
+    const value = event.target.value;
+    setModel(value);
+  };
+
+  const inputs = [
+    {
+      title: "Name",
+      value: name,
+      changeValue: handleNameChange,
+      error: nameError
+    },
+    {
+      title: "Model",
+      value: model,
+      changeValue: handleModel,
+      error: nameError
+    }
+  ]
+
+
+
+
+
+  const handleDelete = async (id) => {
     try {
       // Send the delete request to the backend
       await axios.delete(`http://localhost:4000/furniture/${id}`);
@@ -115,21 +138,21 @@ const FurniturePage = () => {
 
   const handleSubmit = async (event) => {
     event.preventDefault();
-  
-    
-    if (validateForm() && selectedId){
-      
-      
-    try {
-     
-      await axios.post('http://localhost:4000/furniture/', { name, roomId:selectedId });
-      // Close the modal after successful submission
-      setShowModal(false);
-      window.location.reload();
-    } catch (error) {
-      console.error('Error adding furniture:', error);
+
+
+    if (validateForm() && selectedId) {
+
+
+      try {
+
+        await axios.post('http://localhost:4000/furniture/', { name, model, roomId: selectedId });
+        // Close the modal after successful submission
+        setShowModal(false);
+        window.location.reload();
+      } catch (error) {
+        console.error('Error adding furniture:', error);
+      }
     }
-  }
   };
 
 
@@ -144,21 +167,24 @@ const FurniturePage = () => {
     return <div>Error: {error.message}</div>;
   }
 
-    return (
+  return (
     <div>
+      <Navigation />
       <h2>Furniture Page</h2>
       {fields.length > 0 ? (
         <div>
+          <button onClick={handleOpenModal}>Add Furniture</button>
           <ul>
             {furniture.map((item) => (
               <li key={item.id}>
                 <p>Furniture: {item.name}</p>
+                <p>Model: {item.model}</p>
                 <p>Room: {item.Room.name}</p>
                 <button onClick={() => handleDelete(item.id)}>Delete</button>
               </li>
             ))}
           </ul>
-          <button onClick={handleOpenModal}>Add Furniture</button>
+
         </div>
       ) : (
         <p>No existing fields. Please create a room first.</p>
@@ -177,8 +203,10 @@ const FurniturePage = () => {
           handleNameChange={handleNameChange}
           handleChange={handleChange}
           handleSubmit={handleSubmit}
+          // handleModel={handleModel}
           nameError={nameError}
           IdError={IdError}
+          inputs={inputs}
         />
       )}
     </div>

@@ -1,18 +1,22 @@
 import React, { useEffect, useState } from 'react';
 import axios from "axios";
 import Modal from './Modal';
+import Navigation from './Navigation';
 
 
 
 
 const RoomPage = () => {
-    const [room, setRoom] = useState([]);
-    const [error, setError] = useState(null);
-    const [loading, setLoading] = useState(true);
-    const [fields, setfields] = useState([]);
-    const [selectedId, setSelectedId] = useState('');
+  const [room, setRoom] = useState([]);
+  const [error, setError] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [fields, setfields] = useState([]);
+  const [selectedId, setSelectedId] = useState('');
 
-    //Modal State
+  //Modal State
+  const [addingFurnitureToRoom, setAddingFurnitureToRoom] = useState(false);
+  const [model, setModel] = useState('')
+
   const [showModal, setShowModal] = useState(false);
   const [name, setName] = useState('');
   const [apartmentId, setApartmentId] = useState('');
@@ -48,14 +52,16 @@ const RoomPage = () => {
         setError(error);
       }
     };
-    
+
     fetchData();
     fetchfields();
   }, []);
 
 
-  const handleOpenModal = () => {
+  const handleOpenModal = (apartmentId, addingFurniture = false) => {
     setShowModal(true);
+    setAddingFurnitureToRoom(addingFurniture);
+    setApartmentId(apartmentId);
   };
 
   // Function to close the modal
@@ -64,12 +70,12 @@ const RoomPage = () => {
   };
 
 
- //Functions for name,id change and submit
+  //Functions for name,id change and submit
 
 
-  
 
- const validateForm = () => {
+
+  const validateForm = () => {
     let valid = true;
     if (!name.trim()) {
       setNameError('Name is required');
@@ -78,30 +84,51 @@ const RoomPage = () => {
       setNameError('');
     }
 
-    if (selectedId.length===0){
+    if (selectedId.length === 0) {
       setIdError("Please select an apartment")
     }
     else {
       setIdError('')
-    }   
-     return valid;
-};
+    }
+    return valid;
+  };
 
 
-const handleNameChange = (event) => {
+  const handleNameChange = (event) => {
     const value = event.target.value;
     setName(value);
 
   };
 
- 
+
 
   const handleChange = (event) => {
     const value = event.target.value;
     setSelectedId(value);
   };
 
-  const handleDelete = async(id)=>{
+  const handleModel = (event) => {
+    const value = event.target.value;
+    setModel(value);
+  };
+
+  const inputs = [
+    {
+      title: "Name",
+      value: name,
+      changeValue: handleNameChange,
+      error: nameError
+    },
+    {
+      title: "Model",
+      value: model,
+      changeValue: handleModel,
+      error: nameError
+    }
+
+  ]
+
+  const handleDelete = async (id) => {
     try {
       // Send the delete request to the backend
       await axios.delete(`http://localhost:4000/rooms/${id}`);
@@ -113,23 +140,39 @@ const handleNameChange = (event) => {
     }
   }
 
-  const handleSubmit = async (event) => {
-    event.preventDefault();
-  
-    
-    if (validateForm() && selectedId){
+  const handleAddFurniture = async (roomId) => {
+    handleOpenModal(roomId, true);
+  };
 
-      
-    try {
-     
-      await axios.post('http://localhost:4000/rooms/', { name, apartmentId:selectedId });
-      // Close the modal after successful submission
-      setShowModal(false);
-      window.location.reload();
-    } catch (error) {
-      console.error('Error adding rooms:', error);
+
+  const handleSubmit = async (event) => {
+    if (!addingFurnitureToRoom) {
+      // Adding a new room
+      if (validateForm() && selectedId) {
+        try {
+          await axios.post('http://localhost:4000/rooms/', { name, apartmentId: selectedId });
+          setShowModal(false);
+          window.location.reload();
+        } catch (error) {
+          console.error('Error adding rooms:', error);
+        }
+      }
+    } else {
+
+      if (validateForm() && selectedId) {
+
+
+        try {
+
+          await axios.post(`http://localhost:4000/rooms/${selectedId}/furniture`, { name, model });
+          // Close the modal after successful submission
+          setShowModal(false);
+          window.location.reload();
+        } catch (error) {
+          console.error('Error adding furniture:', error);
+        }
+      }
     }
-  }
   };
 
 
@@ -146,19 +189,33 @@ const handleNameChange = (event) => {
 
   return (
     <div>
+      <Navigation />
       <h2>Room Page</h2>
       {fields.length > 0 ? (
         <div>
+          <button onClick={handleOpenModal}>Add Room</button>
           <ul>
             {room.map((item) => (
               <li key={item.id}>
                 <p>Name: {item.name}</p>
                 <p>Apartment: {item.Apartment.name}</p>
+
+                {item.Furniture && item.Furniture.length > 0 && (
+                  <ul>
+                    {item.Furniture.map((furnitureItem) => (
+                      <li key={furnitureItem.id}>
+                        <p>Furniture: {furnitureItem.name}</p>
+                      </li>
+                    ))}
+                  </ul>
+
+                )}
+                <button onClick={() => handleOpenModal(item.Apartment.id, true)}>Add Furniture</button>
                 <button onClick={() => handleDelete(item.id)}>Delete</button>
               </li>
             ))}
           </ul>
-          <button onClick={handleOpenModal}>Add Room</button>
+
         </div>
       ) : (
         <p>No existing apartments. Please create an apartment first.</p>
@@ -179,6 +236,8 @@ const handleNameChange = (event) => {
           handleSubmit={handleSubmit}
           nameError={nameError}
           IdError={IdError}
+          addingFurnitureToRoom={addingFurnitureToRoom}
+          inputs={inputs}
         />
       )}
     </div>
