@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import axios from "axios";
 import Modal from './Modal';
 import Navigation from './Navigation';
@@ -12,6 +12,7 @@ const RoomPage = () => {
   const [loading, setLoading] = useState(true);
   const [fields, setfields] = useState([]);
   const [selectedId, setSelectedId] = useState('');
+  const [selectedRoomId, setSelectedRoomId] = useState('');
 
   //Modal State
   const [addingFurnitureToRoom, setAddingFurnitureToRoom] = useState(false);
@@ -58,10 +59,10 @@ const RoomPage = () => {
   }, []);
 
 
-  const handleOpenModal = (apartmentId, addingFurniture = false) => {
+  const handleOpenModal = (Id, addingFurniture = false) => {
     setShowModal(true);
     setAddingFurnitureToRoom(addingFurniture);
-    setApartmentId(apartmentId);
+    setApartmentId(Id);
   };
 
   // Function to close the modal
@@ -112,21 +113,36 @@ const RoomPage = () => {
     setModel(value);
   };
 
-  const inputs = [
-    {
-      title: "Name",
-      value: name,
-      changeValue: handleNameChange,
-      error: nameError
-    },
-    {
-      title: "Model",
-      value: model,
-      changeValue: handleModel,
-      error: nameError
-    }
+  const inputs = useMemo(() => {
+    if (selectedRoomId) return [
+      {
+        title: "Name",
+        value: name,
+        changeValue: handleNameChange,
+        error: nameError
+      },
+      {
+        title: "Model",
+        value: model,
+        changeValue: handleModel,
+        error: nameError
+      }
 
-  ]
+    ]
+    return [
+      {
+        title: "Name",
+        value: name,
+        changeValue: handleNameChange,
+        error: nameError
+      }
+
+    ]
+
+  }, [selectedId, handleNameChange, handleModel, model, name, nameError])
+
+  // selectedId
+
 
   const handleDelete = async (id) => {
     try {
@@ -142,38 +158,43 @@ const RoomPage = () => {
 
   const handleAddFurniture = async (roomId) => {
     handleOpenModal(roomId, true);
+    setSelectedRoomId(roomId);
   };
 
 
   const handleSubmit = async (event) => {
-    if (!addingFurnitureToRoom) {
-      // Adding a new room
-      if (validateForm() && selectedId) {
+    event.preventDefault();
+
+    if (addingFurnitureToRoom) {
+      if (validateForm()) {
         try {
-          await axios.post('http://localhost:4000/rooms/', { name, apartmentId: selectedId });
-          setShowModal(false);
-          window.location.reload();
-        } catch (error) {
-          console.error('Error adding rooms:', error);
-        }
-      }
-    } else {
+          console.log("Selected ID:", selectedRoomId);
+          console.log("Name:", name);
+          console.log("Model:", model);
+          await axios.post(`http://localhost:4000/rooms/${selectedRoomId}/furniture`, { name, model, roomId: selectedRoomId });
 
-      if (validateForm() && selectedId) {
-
-
-        try {
-
-          await axios.post(`http://localhost:4000/rooms/${selectedId}/furniture`, { name, model });
-          // Close the modal after successful submission
           setShowModal(false);
           window.location.reload();
         } catch (error) {
           console.error('Error adding furniture:', error);
         }
       }
+    } else {
+      // Adding a new room
+      if (validateForm() && selectedId) {
+        try {
+
+          await axios.post('http://localhost:4000/rooms/', { name, apartmentId: selectedId });
+          setShowModal(false);
+          // window.location.reload();
+          window.location.reload();
+        } catch (error) {
+          console.error('Error adding rooms:', error);
+        }
+      }
     }
   };
+
 
 
 
@@ -210,7 +231,7 @@ const RoomPage = () => {
                   </ul>
 
                 )}
-                <button onClick={() => handleOpenModal(item.Apartment.id, true)}>Add Furniture</button>
+                <button onClick={() => handleAddFurniture(item.id)}>Add Furniture</button>
                 <button onClick={() => handleDelete(item.id)}>Delete</button>
               </li>
             ))}
