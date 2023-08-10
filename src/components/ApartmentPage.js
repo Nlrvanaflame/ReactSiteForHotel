@@ -10,6 +10,7 @@ const ApartmentPage = () => {
   const [fields, setFields] = useState([]);
   const [selectedId, setSelectedId] = useState('');
 
+
   //Modal State
   const [showModal, setShowModal] = useState(false);
   const [name, setName] = useState('');
