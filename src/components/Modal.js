@@ -1,6 +1,6 @@
 import React from 'react';
 
-const Modal = ({ isOpen, onClose, selectedId, fields, handleChange, handleSubmit, IdError, addingFurnitureToRoom, inputs }) => {
+const Modal = ({ isOpen, onClose, selectedId, dropdownData, handleChange, handleSubmit, IdError, addingFurnitureToRoom, inputs }) => {
   if (!isOpen) {
     return null;
   }
@@ -8,7 +8,8 @@ const Modal = ({ isOpen, onClose, selectedId, fields, handleChange, handleSubmit
 
   return (
     <div className="modal">
-      <h2>{addingFurnitureToRoom ? 'Add Furniture' : 'Add Room'}</h2>
+      {/* <h2>{addingFurnitureToRoom ? 'Add Furniture' : 'Add Room'}</h2> */}
+      <h2>Add </h2>
       <form onSubmit={handleSubmit}>
         {inputs.map((input) => (
           <div key={input.title}>
@@ -20,17 +21,19 @@ const Modal = ({ isOpen, onClose, selectedId, fields, handleChange, handleSubmit
           </div>
         ))}
 
-
-
         {!addingFurnitureToRoom && (
           <div>
             <label>
               Placing:
-              <select value={selectedId} onChange={handleChange}>
+              <select
+                value={selectedId}
+                onChange={handleChange}
+                name="roomId" // Add the name attribute
+              >
                 <option value="">Select</option>
-                {fields.map((items) => (
-                  <option key={items.id} value={items.id}>
-                    {items.name}
+                {dropdownData.map(item => (
+                  <option key={item.id} value={item.id}>
+                    {item.name}
                   </option>
                 ))}
               </select>
@@ -47,6 +50,5 @@ const Modal = ({ isOpen, onClose, selectedId, fields, handleChange, handleSubmit
     </div>
   );
 };
-
 
 export default Modal;

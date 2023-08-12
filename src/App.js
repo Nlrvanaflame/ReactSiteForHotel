@@ -9,8 +9,6 @@ import FloorPage from './components/FloorPage'
 import {
   createBrowserRouter,
   RouterProvider,
-  Route,
-  Link,
   Outlet
 } from "react-router-dom";
 
@@ -34,11 +32,11 @@ function App() {
     },
     {
       path: '/furniture',
-      element: <FurniturePage/>,
+      element: <FurniturePage />,
     },
     {
       path: '/electrical-equipment',
-      element: <ElectricalEquipmentPage/>,
+      element: <ElectricalEquipmentPage />,
     },
     {
       path: '*',
@@ -46,24 +44,24 @@ function App() {
     },
     {
       path: '/rooms',
-      element: <RoomPage/>
+      element: <RoomPage />
     },
     {
       path: '/apartments',
-      element: <ApartmentPage/>
+      element: <ApartmentPage />
     },
     {
       path: '/floors',
-      element: <FloorPage/>
+      element: <FloorPage />
     }
 
   ];
 
 
   const router = createBrowserRouter(routes);
-  
 
-return <RouterProvider router={router} />
+
+  return <RouterProvider router={router} />
 
 }
 

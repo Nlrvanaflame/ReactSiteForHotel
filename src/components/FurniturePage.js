@@ -5,21 +5,26 @@ import Navigation from './Navigation';
 
 
 
-
 const FurniturePage = () => {
   const [furniture, setFurniture] = useState([]);
   const [error, setError] = useState(null);
   const [loading, setLoading] = useState(true);
-  const [fields, setfields] = useState([]);
-  const [selectedId, setSelectedId] = useState('');
 
-  //Modal State
-  const [model, setModel] = useState('')
-  const [showModal, setShowModal] = useState(false);
-  const [name, setName] = useState('');
-  const [roomId, setRoomId] = useState('');
-  const [nameError, setNameError] = useState('');
-  const [IdError, setIdError] = useState('');
+  const [formData, setFormData] = useState({
+    name: '',
+    model: '',
+    roomId: '',
+    nameError: '',
+    IdError: '',
+    roomsData: []
+
+  });
+
+  const [modalData, setModalData] = useState({
+    isOpen: false,
+    addingFurnitureToRoom: false,
+
+  });
 
 
 
@@ -27,98 +32,87 @@ const FurniturePage = () => {
     const fetchData = async () => {
       setLoading(true);
       try {
-        console.log('Fetching furniture data...');
-        const response = await axios.get('http://localhost:4000/furniture/');
-        console.log('Fetched furniture data:', response.data);
-        setFurniture(response.data);
+        const [furnitureResponse, roomsResponse] = await Promise.all([
+          axios.get('http://localhost:4000/furniture/'),
+          axios.get('http://localhost:4000/rooms/')
+        ]);
+
+        setFurniture(furnitureResponse.data);
+
+        const roomsData = roomsResponse.data;
+
+        setFormData((prevFormData) => ({
+          ...prevFormData,
+          roomsData
+        }));
+
+
       } catch (error) {
-        console.log('Error fetching furniture data:', error);
         setError(error);
       }
       setLoading(false);
     };
 
-
-    const fetchfields = async () => {
-      try {
-        console.log('Fetching rooms...');
-        const response = await axios.get('http://localhost:4000/rooms/');
-        console.log('Fetched rooms:', response.data);
-        setfields(response.data);
-      } catch (error) {
-        console.log('Error fetching rooms:', error);
-        setError(error);
-      }
-    };
-
     fetchData();
-    fetchfields();
   }, []);
 
 
   const handleOpenModal = () => {
-    setShowModal(true);
+    setModalData({
+      isOpen: true,
+    });
   };
 
-  // Function to close the modal
   const handleCloseModal = () => {
-    setShowModal(false);
+    setModalData({
+      isOpen: false,
+      addingFurnitureToRoom: false
+    });
   };
 
 
-  //Functions for name,id change and submit
 
-
-
-
-  const validateForm = () => {
-    let valid = true;
-    if (!name.trim()) {
-      setNameError('Name is required');
-      valid = false;
-    } else {
-      setNameError('');
-    }
-
-    if (selectedId.length === 0) {
-      setIdError("Please select a room")
-    }
-    else {
-      setIdError('')
-    }
-    return valid;
-  };
 
   const handleNameChange = (event) => {
     const value = event.target.value;
-    setName(value);
-
+    setFormData({
+      ...formData,
+      name: value,
+    });
   };
 
   const handleChange = (event) => {
     const value = event.target.value;
-    setSelectedId(value);
+    setFormData({
+      ...formData,
+      roomId: value,
+    });
   };
 
   const handleModel = (event) => {
     const value = event.target.value;
-    setModel(value);
+    setFormData({
+      ...formData,
+      model: value,
+    });
   };
+
 
   const inputs = [
     {
       title: "Name",
-      value: name,
+      value: formData.name,
       changeValue: handleNameChange,
-      error: nameError
+      error: formData.nameError,
     },
     {
       title: "Model",
-      value: model,
+      value: formData.model,
       changeValue: handleModel,
-      error: nameError
-    }
-  ]
+      error: formData.nameError,
+    },
+  ];
+
 
 
 
@@ -126,32 +120,33 @@ const FurniturePage = () => {
 
   const handleDelete = async (id) => {
     try {
-      // Send the delete request to the backend
       await axios.delete(`http://localhost:4000/furniture/${id}`);
-
-      // Update the furniture state to remove the deleted furniture
-      setFurniture((prevFurniture) => prevFurniture.filter((item) => item.id !== id));
+      setFurniture(prevFurniture => prevFurniture.filter(item => item.id !== id));
     } catch (error) {
       console.log('Error deleting furniture:', error);
     }
-  }
+  };
 
   const handleSubmit = async (event) => {
     event.preventDefault();
 
+    const { name, model, roomId } = formData;
+    if (!name.trim()) {
+      setFormData(prevData => ({ ...prevData, nameError: 'Name is required' }));
+      return;
+    }
 
-    if (validateForm() && selectedId) {
+    if (!roomId) {
+      setFormData(prevData => ({ ...prevData, IdError: 'Please select a room' }));
+      return;
+    }
 
-
-      try {
-
-        await axios.post('http://localhost:4000/furniture/', { name, model, roomId: selectedId });
-        // Close the modal after successful submission
-        setShowModal(false);
-        window.location.reload();
-      } catch (error) {
-        console.error('Error adding furniture:', error);
-      }
+    try {
+      await axios.post('http://localhost:4000/furniture/', { name, model, roomId });
+      setModalData(false);
+      window.location.reload();
+    } catch (error) {
+      console.error('Error adding furniture:', error);
     }
   };
 
@@ -171,7 +166,7 @@ const FurniturePage = () => {
     <div>
       <Navigation />
       <h2>Furniture Page</h2>
-      {fields.length > 0 ? (
+      {formData.roomsData.length > 0 ? (
         <div>
           <button onClick={handleOpenModal}>Add Furniture</button>
           <ul>
@@ -187,25 +182,20 @@ const FurniturePage = () => {
 
         </div>
       ) : (
-        <p>No existing fields. Please create a room first.</p>
+        <p>No existing furniture. Please add furniture.</p>
       )}
 
-
       {/* Render the Modal component conditionally */}
-      {showModal && (
+      {modalData.isOpen && (
         <Modal
-          isOpen={showModal}
+          isOpen={modalData.isOpen}
           onClose={handleCloseModal}
-          name={name}
-          selectedId={selectedId}
-          fields={fields}
-          roomId={roomId}
-          handleNameChange={handleNameChange}
+          selectedId={formData.roomId}
+          dropdownData={formData.roomsData}
           handleChange={handleChange}
           handleSubmit={handleSubmit}
-          // handleModel={handleModel}
-          nameError={nameError}
-          IdError={IdError}
+          IdError={formData.IdError}
+          addingFurnitureToRoom={modalData.addingFurnitureToRoom}
           inputs={inputs}
         />
       )}
