@@ -28,7 +28,7 @@ const Modal = ({ isOpen, onClose, selectedId, dropdownData, handleChange, handle
               <select
                 value={selectedId}
                 onChange={handleChange}
-                name="roomId" // Add the name attribute
+                name="roomId"
               >
                 <option value="">Select</option>
                 {dropdownData.map(item => (
