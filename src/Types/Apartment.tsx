@@ -12,8 +12,10 @@ interface Apartment {
 
 export interface FormData {
     name: string;
+    model: string;
     floorId: string;
     nameError: string;
+    modelError: string;
     IdError: string;
     floorsData: Floor[];
 }
@@ -22,6 +24,8 @@ export interface ModalData {
     isOpen: boolean;
     addingFurnitureToRoom: boolean;
     apartmentId: string;
+    adding2: boolean;
+    roomId: string,
 }
 
 export default Apartment;
