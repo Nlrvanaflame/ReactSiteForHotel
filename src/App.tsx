@@ -9,16 +9,12 @@ import FloorPage from './components/FloorPage'
 import {
   createBrowserRouter,
   RouterProvider,
-  Outlet
+  Outlet,
+  RouteObject,
 } from "react-router-dom";
 
-
-
-
 function App() {
-
-
-  const routes = [
+  const routes: RouteObject[] = [
     {
       path: '/',
       element: (
@@ -54,15 +50,11 @@ function App() {
       path: '/floors',
       element: <FloorPage />
     }
-
   ];
-
 
   const router = createBrowserRouter(routes);
 
-
-  return <RouterProvider router={router} />
-
+  return <RouterProvider router={router} />;
 }
 
 export default App;

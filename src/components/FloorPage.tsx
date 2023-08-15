@@ -1,59 +1,69 @@
 import React, { useEffect, useMemo, useState } from 'react';
-import axios from "axios";
+import axios from 'axios';
 import Modal from './Modal';
 import Navigation from './Navigation';
+import Hotel from '../Types/Hotel'
+import Floor from '../Types/Floor';
 
-const FloorPage = () => {
-  const [floor, setFloors] = useState([]);
-  const [error, setError] = useState(null);
-  const [loading, setLoading] = useState(true);
+interface FormData {
+  name: string;
+  hotelId: string;
+  nameError: string;
+  IdError: string;
+  hotelsData: Hotel[];
+}
 
+interface ModalData {
+  isOpen: boolean;
+  addingFurnitureToRoom: boolean;
+  floorId: string;
+}
 
+const FloorPage: React.FC = () => {
+  const [floor, setFloors] = useState<Floor[]>([]);
+  const [error, setError] = useState<Error | null>(null);
+  const [loading, setLoading] = useState<boolean>(true);
 
-  const [formData, setFormData] = useState({
+  const [formData, setFormData] = useState<FormData>({
     name: '',
     hotelId: '',
     nameError: '',
     IdError: '',
-    hotelsData: []
-
+    hotelsData: [],
   });
 
-  const [modalData, setModalData] = useState({
+  const [modalData, setModalData] = useState<ModalData>({
     isOpen: false,
     addingFurnitureToRoom: false,
-    floorId: ''
+    floorId: '',
   });
+
   useEffect(() => {
     const fetchData = async () => {
       setLoading(true);
       try {
-
         const [floorsResponse, hotelResponse] = await Promise.all([
-          axios.get('http://localhost:4000/floors/'),
-          axios.get('http://localhost:4000/hotels/')
+          axios.get<Floor[]>('http://localhost:4000/floors/'),
+          axios.get<Hotel[]>('http://localhost:4000/hotels/'),
         ]);
 
         setFloors(floorsResponse.data);
 
-        const hotelsData = hotelResponse.data
+        const hotelsData = hotelResponse.data;
         setFormData((prevData) => ({
           ...prevData,
-          hotelsData
-        }))
-
+          hotelsData,
+        }));
       } catch (error) {
-        setError(error);
+        setError(error as Error);
       }
       setLoading(false);
     };
 
-
     fetchData();
   }, []);
 
-
-  const change = (key) => (event) => {
+  const change = (key: keyof FormData) => (event: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
     const value = event.target.value;
     setFormData({
       ...formData,
@@ -61,47 +71,42 @@ const FloorPage = () => {
     });
   };
 
-  const handleChange = change("hotelId")
-  const handleNameChange = change("name")
+  const handleChange = change('hotelId');
+  const handleNameChange = change('name');
 
   const inputs = useMemo(() => {
     return [
       {
-        title: "Name",
+        title: 'Name',
         value: formData.name,
         changeValue: handleNameChange,
-        error: formData.nameError
-      }
-    ]
-  }, [formData, handleNameChange,])
-
-
+        error: formData.nameError,
+      },
+    ];
+  }, [formData, handleNameChange]);
 
   const validateForm = () => {
     const { name, hotelId } = formData;
     let isValid = true;
 
     if (!name.trim()) {
-      setFormData(prevData => ({ ...prevData, nameError: 'Name is required' }));
+      setFormData((prevData) => ({ ...prevData, nameError: 'Name is required' }));
       isValid = false;
     } else {
-      setFormData(prevData => ({ ...prevData, nameError: '' }));
+      setFormData((prevData) => ({ ...prevData, nameError: '' }));
     }
 
     if (!hotelId && !modalData.addingFurnitureToRoom) {
-      setFormData(prevData => ({ ...prevData, IdError: 'Please select a hotel' }));
+      setFormData((prevData) => ({ ...prevData, IdError: 'Please select a hotel' }));
       isValid = false;
     } else {
-      setFormData(prevData => ({ ...prevData, IdError: '' }));
+      setFormData((prevData) => ({ ...prevData, IdError: '' }));
     }
 
     return isValid;
-  }
+  };
 
-
-
-
-  const handleDelete = async (id) => {
+  const handleDelete = async (id: number) => {
     try {
       await axios.delete(`http://localhost:4000/floors/${id}`);
       setFloors((prevFloors) => prevFloors.filter((item) => item.id !== id));
@@ -110,21 +115,19 @@ const FloorPage = () => {
     }
   };
 
-  const handleAddApartment = (floorId) => {
+  const handleAddApartment = (floorId: string) => {
     setModalData({
       isOpen: true,
       addingFurnitureToRoom: true,
-      floorId
+      floorId,
     });
   };
 
-  const handleSubmit = async (event) => {
+  const handleSubmit = async (event: React.FormEvent) => {
     event.preventDefault();
 
     const { name, hotelId } = formData;
     const { floorId } = modalData;
-
-
 
     if (!modalData.addingFurnitureToRoom) {
       if (validateForm()) {
@@ -133,16 +136,14 @@ const FloorPage = () => {
           setModalData({
             isOpen: false,
             addingFurnitureToRoom: false,
-            floorId: ''
+            floorId: '',
           });
           window.location.reload();
         } catch (error) {
           console.error('Error adding floor:', error);
         }
       }
-
-    }
-    else {
+    } else {
       if (validateForm()) {
         try {
           await axios.post(`http://localhost:4000/floors/${floorId}/apartments`, { name, floorId });
@@ -150,16 +151,15 @@ const FloorPage = () => {
           setModalData({
             isOpen: false,
             addingFurnitureToRoom: false,
-            floorId: ''
+            floorId: '',
           });
           window.location.reload();
         } catch (error) {
           console.error('Error adding apartment:', error);
         }
       }
-
     }
-  }
+  };
 
   if (loading) {
     return <div>Loading...</div>;
@@ -175,14 +175,13 @@ const FloorPage = () => {
       <h2>Floor Page</h2>
       {formData.hotelsData.length > 0 ? (
         <div>
-          <button onClick={() => setModalData({ addingFurnitureToRoom: false, isOpen: true }
-          )}>Add Floor</button>
+          <button onClick={() => setModalData({ addingFurnitureToRoom: false, isOpen: true, floorId: '' })}>Add Floor</button>
           <ul>
             {floor.map((item) => (
               <li key={item.id}>
                 <p>Name: {item.name}</p>
                 <p>Hotel: {item.Hotel.name}</p>
-                <button onClick={() => handleAddApartment(item.id)}>Add Apartment</button>
+                <button onClick={() => handleAddApartment(item.id.toString())}>Add Apartment</button>
                 <button onClick={() => handleDelete(item.id)}>Delete</button>
 
                 {item.Apartments && item.Apartments.length > 0 && (
@@ -198,7 +197,6 @@ const FloorPage = () => {
               </li>
             ))}
           </ul>
-
         </div>
       ) : (
         <p>No existing hotels. Please create a hotel first.</p>
@@ -207,8 +205,7 @@ const FloorPage = () => {
       {modalData.isOpen && (
         <Modal
           isOpen={modalData.isOpen}
-          onClose={() =>
-            setModalData({ ...modalData, addingFurnitureToRoom: false, isOpen: false })}
+          onClose={() => setModalData({ ...modalData, addingFurnitureToRoom: false, isOpen: false })}
           selectedId={formData.hotelId}
           dropdownData={formData.hotelsData}
           handleChange={handleChange}

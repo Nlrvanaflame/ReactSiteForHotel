@@ -1,52 +1,66 @@
 import React, { useEffect, useMemo, useState } from 'react';
-import axios from "axios";
+import axios from 'axios';
 import Modal from './Modal';
 import Navigation from './Navigation';
+import Room from '../Types/Room';
+import Apartment from '../Types/Apartment';
 
+interface FormData {
+  name: string;
+  model: string;
+  apartmentId: string;
+  nameError: string;
+  modelError: string;
+  IdError: string;
+  apartmentsData: Apartment[];
+}
 
-const RoomPage = () => {
-  const [room, setRoom] = useState([]);
-  const [error, setError] = useState(null);
-  const [loading, setLoading] = useState(true);
+interface ModalData {
+  isOpen: boolean;
+  addingFurnitureToRoom: boolean;
+  roomId: string;
+}
 
-  const [formData, setFormData] = useState({
+const RoomPage: React.FC = () => {
+  const [room, setRoom] = useState<Room[]>([]);
+  const [error, setError] = useState<Error | null>(null);
+  const [loading, setLoading] = useState<boolean>(true);
+
+  const [formData, setFormData] = useState<FormData>({
     name: '',
     model: '',
     apartmentId: '',
     nameError: '',
+    modelError: '',
     IdError: '',
-    apartmentsData: []
-
+    apartmentsData: [],
   });
 
-  const [modalData, setModalData] = useState({
+  const [modalData, setModalData] = useState<ModalData>({
     isOpen: false,
     addingFurnitureToRoom: false,
-    roomId: ''
+    roomId: '',
   });
-
 
   useEffect(() => {
     const fetchData = async () => {
       setLoading(true);
       try {
         const [roomsResponse, apartmentResponse] = await Promise.all([
-          axios.get('http://localhost:4000/rooms/'),
-          axios.get('http://localhost:4000/apartments/')
+          axios.get<Room[]>('http://localhost:4000/rooms/'),
+          axios.get<Apartment[]>('http://localhost:4000/apartments/'),
         ]);
 
         setRoom(roomsResponse.data);
 
-        const apartmentsData = apartmentResponse.data
+        const apartmentsData = apartmentResponse.data;
 
         setFormData((prevData) => ({
           ...prevData,
-          apartmentsData
-        }))
-
-
+          apartmentsData,
+        }));
       } catch (error) {
-        setError(error);
+        setError(error as Error);
       }
       setLoading(false);
     };
@@ -54,8 +68,7 @@ const RoomPage = () => {
     fetchData();
   }, []);
 
-
-  const change = (key) => (event) => {
+  const change = (key: keyof FormData) => (event: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
     const value = event.target.value;
     setFormData({
       ...formData,
@@ -63,51 +76,47 @@ const RoomPage = () => {
     });
   };
 
-  const handleChange = change("apartmentId")
-
-  const handleModel = change("model")
-
-  const handleNameChange = change("name")
+  const handleChange = change('apartmentId');
+  const handleModel = change('model');
+  const handleNameChange = change('name');
 
   const inputs = useMemo(() => {
-    if (modalData.addingFurnitureToRoom) return [
-      {
-        title: "Name",
-        value: formData.name,
-        changeValue: handleNameChange,
-        error: formData.nameError
-      },
-      {
-        title: "Model",
-        value: formData.model,
-        changeValue: handleModel,
-        error: formData.modelError
-      }
-
-    ]
+    if (modalData.addingFurnitureToRoom) {
+      return [
+        {
+          title: 'Name',
+          value: formData.name,
+          changeValue: handleNameChange,
+          error: formData.nameError,
+        },
+        {
+          title: 'Model',
+          value: formData.model,
+          changeValue: handleModel,
+          error: formData.modelError,
+        },
+      ];
+    }
     return [
       {
-        title: "Name",
+        title: 'Name',
         value: formData.name,
         changeValue: handleNameChange,
-        error: formData.nameError
-      }
+        error: formData.nameError,
+      },
+    ];
+  }, [formData, handleNameChange, handleModel, modalData.addingFurnitureToRoom]);
 
-    ]
-
-  }, [formData, handleNameChange, handleModel, modalData.addingFurnitureToRoom])
-
-
-  const handleDelete = async (id) => {
+  const handleDelete = async (id: number) => {
     try {
       await axios.delete(`http://localhost:4000/rooms/${id}`);
       setRoom((prevRooms) => prevRooms.filter((item) => item.id !== id));
     } catch (error) {
       console.log('Error deleting rooms:', error);
     }
-  }
+  };
 
-  const handleAddFurniture = (roomId) => {
+  const handleAddFurniture = (roomId: string) => {
     setModalData({
       isOpen: true,
       addingFurnitureToRoom: true,
@@ -120,31 +129,30 @@ const RoomPage = () => {
     let isValid = true;
 
     if (!name.trim()) {
-      setFormData(prevData => ({ ...prevData, nameError: 'Name is required' }));
+      setFormData((prevData) => ({ ...prevData, nameError: 'Name is required' }));
       isValid = false;
     } else {
-      setFormData(prevData => ({ ...prevData, nameError: '' }));
+      setFormData((prevData) => ({ ...prevData, nameError: '' }));
     }
 
     if (!model.trim() && modalData.addingFurnitureToRoom) {
-      setFormData(prevData => ({ ...prevData, modelError: 'Model is required' }));
+      setFormData((prevData) => ({ ...prevData, modelError: 'Model is required' }));
       isValid = false;
     } else {
-      setFormData(prevData => ({ ...prevData, modelError: '' }));
+      setFormData((prevData) => ({ ...prevData, modelError: '' }));
     }
 
     if (!apartmentId && !modalData.addingFurnitureToRoom) {
-      setFormData(prevData => ({ ...prevData, IdError: 'Please select an apartment' }));
+      setFormData((prevData) => ({ ...prevData, IdError: 'Please select an apartment' }));
       isValid = false;
     } else {
-      setFormData(prevData => ({ ...prevData, IdError: '' }));
+      setFormData((prevData) => ({ ...prevData, IdError: '' }));
     }
 
     return isValid;
-  }
+  };
 
-
-  const handleSubmit = async (event) => {
+  const handleSubmit = async (event: React.FormEvent) => {
     event.preventDefault();
 
     const { name, model, apartmentId } = formData;
@@ -157,15 +165,14 @@ const RoomPage = () => {
           setModalData({
             isOpen: false,
             addingFurnitureToRoom: false,
-            roomId: ''
+            roomId: '',
           });
           window.location.reload();
         } catch (error) {
-          console.error('Error adding furniture:', error);
+          console.error('Error adding room:', error);
         }
       }
-    }
-    else {
+    } else {
       if (validateForm()) {
         try {
           console.log('Sending request to add furniture to room with roomId:', roomId);
@@ -174,7 +181,7 @@ const RoomPage = () => {
           setModalData({
             isOpen: false,
             addingFurnitureToRoom: false,
-            roomId: ''
+            roomId: '',
           });
           window.location.reload();
         } catch (error) {
@@ -182,7 +189,7 @@ const RoomPage = () => {
         }
       }
     }
-  }
+  };
 
   if (loading) {
     return <div>Loading...</div>;
@@ -198,16 +205,14 @@ const RoomPage = () => {
       <h2>Room Page</h2>
       {formData.apartmentsData.length > 0 ? (
         <div>
-          <button onClick={() => setModalData({ addingFurnitureToRoom: false, isOpen: true }
-          )}>Add Room</button>
+          <button onClick={() => setModalData({ addingFurnitureToRoom: false, isOpen: true, roomId: '', })}>Add Room</button>
           <ul>
             {room.map((item) => (
               <li key={item.id}>
                 <p>Name: {item.name}</p>
                 <p>Apartment: {item.Apartment.name}</p>
-                <button onClick={() => handleAddFurniture(item.id)}>Add Furniture</button>
+                <button onClick={() => handleAddFurniture(item.id.toString())}>Add Furniture</button>
                 <button onClick={() => handleDelete(item.id)}>Delete</button>
-
 
                 {item.Furniture && item.Furniture.length > 0 && (
                   <ul>
@@ -222,7 +227,6 @@ const RoomPage = () => {
               </li>
             ))}
           </ul>
-
         </div>
       ) : (
         <p>No existing apartments. Please create an apartment first.</p>
@@ -231,7 +235,7 @@ const RoomPage = () => {
       {modalData.isOpen && (
         <Modal
           isOpen={modalData.isOpen}
-          onClose={() => setModalData({ addingFurnitureToRoom: false, isOpen: false })}
+          onClose={() => setModalData({ addingFurnitureToRoom: false, isOpen: false, roomId: '', })}
           selectedId={formData.apartmentId}
           dropdownData={formData.apartmentsData}
           handleChange={handleChange}
@@ -245,4 +249,4 @@ const RoomPage = () => {
   );
 };
 
-export default RoomPage
+export default RoomPage;
