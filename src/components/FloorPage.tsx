@@ -4,20 +4,8 @@ import Modal from './Modal';
 import Navigation from './Navigation';
 import Hotel from '../Types/Hotel'
 import Floor from '../Types/Floor';
-
-interface FormData {
-  name: string;
-  hotelId: string;
-  nameError: string;
-  IdError: string;
-  hotelsData: Hotel[];
-}
-
-interface ModalData {
-  isOpen: boolean;
-  addingFurnitureToRoom: boolean;
-  floorId: string;
-}
+import { ModalData } from '../Types/Floor';
+import { FormData } from '../Types/Floor';
 
 const FloorPage: React.FC = () => {
   const [floor, setFloors] = useState<Floor[]>([]);

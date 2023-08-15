@@ -4,25 +4,11 @@ import Modal from './Modal';
 import Navigation from './Navigation';
 import Room from '../Types/Room'
 import Furniture from '../Types/Furniture';
+import { FormData } from '../Types/Furniture';
+import { ModalData } from '../Types/Furniture';
 
 
 
-
-
-interface FormData {
-  name: string;
-  model: string;
-  roomId: string;
-  nameError: string;
-  modelError: string;
-  IdError: string;
-  roomsData: Room[];
-}
-
-interface ModalData {
-  isOpen: boolean;
-  addingFurnitureToRoom: boolean;
-}
 
 const FurniturePage: React.FC = () => {
   const [furniture, setFurniture] = useState<Furniture[]>([]);

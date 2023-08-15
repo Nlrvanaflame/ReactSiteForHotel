@@ -1,4 +1,4 @@
-
+import Apartment from "./Apartment";
 
 interface Room {
     id: number;
@@ -11,5 +11,22 @@ interface Room {
         name: string;
     }[];
 }
+
+export interface FormData {
+    name: string;
+    model: string;
+    apartmentId: string;
+    nameError: string;
+    modelError: string;
+    IdError: string;
+    apartmentsData: Apartment[];
+}
+
+export interface ModalData {
+    isOpen: boolean;
+    addingFurnitureToRoom: boolean;
+    roomId: string;
+}
+
 
 export default Room;
