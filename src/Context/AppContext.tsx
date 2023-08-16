@@ -11,12 +11,21 @@ import Furniture from '../Types/Furniture';
 import Hotel from '../Types/Hotel';
 
 
-interface AppContextType {
-    hotels: Hotel[];
-    floors: Floor[];
-    apartments: Apartment[];
-    rooms: Room[];
-    furniture: Furniture[];
+interface AppData {
+    hotels?: Hotel[];
+    floors?: Floor[];
+    apartments?: Apartment[];
+    rooms?: Room[];
+    furnitures?: Furniture[];
+}
+
+interface AppContextType extends AppData {
+
+    setHotels: (hotels: Hotel[]) => void;
+    setFloors: (floors: Floor[]) => void;
+    setApartments: (apartments: Apartment[]) => void;
+    setRooms: (rooms: Room[]) => void;
+    setFurniture: (furnitures: Furniture[]) => void;
     fetchApartmentsAndRooms: () => void;
     loading: boolean;
     error: Error | null;
@@ -25,32 +34,29 @@ interface AppProviderProps {
     children: React.ReactNode;
 }
 
+
+
 const AppContext = createContext<AppContextType | undefined>(undefined);
 
 const AppProvider: React.FC<AppProviderProps> = ({ children }) => {
-    const [hotels, setHotels] = useState<Hotel[]>([]);
-    const [floors, setFloors] = useState<Floor[]>([]);
-    const [apartments, setApartments] = useState<Apartment[]>([]);
-    const [rooms, setRooms] = useState<Room[]>([]);
-    const [furniture, setFurniture] = useState<Furniture[]>([]);
+
+
+    const [appData, setAppData] = useState<AppData>({});
     const [loading, setLoading] = useState<boolean>(true);
     const [error, setError] = useState<Error | null>(null);
 
     const fetchApartmentsAndRooms = async () => {
         setLoading(true);
         try {
-            const [hotelsResponse, floorsResponse, apartmentsResponse, roomsResponse, furnitureResponse] = await Promise.all([
-                axios.get<Hotel[]>('http://localhost:4000/hotels/'),
-                axios.get<Floor[]>('http://localhost:4000/floors/'),
-                axios.get<Apartment[]>('http://localhost:4000/apartments/'),
-                axios.get<Room[]>('http://localhost:4000/rooms/'),
-                axios.get<Furniture[]>('http://localhost:4000/furniture/'),
+            const [appDataResponse] = await Promise.all([
+                axios.get<AppData>('http://localhost:4000/alldata/'),
             ]);
-            setHotels(hotelsResponse.data)
-            setFloors(floorsResponse.data);
-            setApartments(apartmentsResponse.data);
-            setRooms(roomsResponse.data);
-            setFurniture(furnitureResponse.data);
+
+            setAppData(appDataResponse.data)
+
+            console.log("appdata resp is here", appDataResponse.data)
+
+            console.log("Furniture data fetched:", appDataResponse.data.furnitures);
         } catch (error) {
             setError(error as Error);
         }
@@ -61,12 +67,54 @@ const AppProvider: React.FC<AppProviderProps> = ({ children }) => {
         fetchApartmentsAndRooms();
     }, []);
 
+
+
+
+
+
     const contextValue: AppContextType = {
-        hotels,
-        floors,
-        apartments,
-        rooms,
-        furniture,
+        setHotels: (hotels: Hotel[]) => {
+            setAppData((old) => {
+                return {
+                    ...old,
+                    hotels,
+                }
+            })
+        },
+        setFloors: (floors: Floor[]) => {
+            setAppData((old) => {
+                return {
+                    ...old,
+                    floors,
+                }
+            })
+        },
+        setApartments: (apartments: Apartment[]) => {
+            setAppData((old) => {
+                return {
+                    ...old,
+                    apartments
+                }
+            })
+        },
+        setRooms: (rooms: Room[]) => {
+            setAppData((old) => {
+                return {
+                    ...old,
+                    rooms,
+                }
+            })
+        },
+        setFurniture: (furnitures: Furniture[]) => {
+            console.log("Setting furniture data:", furnitures);
+            setAppData((old) => {
+                return {
+                    ...old,
+                    furnitures,
+                }
+            })
+        },
+        ...appData,
         fetchApartmentsAndRooms,
         loading,
         error

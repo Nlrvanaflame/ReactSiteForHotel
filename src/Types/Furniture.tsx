@@ -4,8 +4,9 @@ interface Furniture {
     id: number;
     name: string;
     model: string;
+    roomId: number;
     Room: {
-        name: string;
+        id: number;
     };
 }
 

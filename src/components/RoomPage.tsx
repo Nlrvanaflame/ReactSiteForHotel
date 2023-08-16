@@ -7,7 +7,7 @@ import { ModalData } from '../Types/Room';
 import { useAppContext } from '../Context/AppContext';
 
 const RoomPage: React.FC = () => {
-  const { apartments, rooms, fetchApartmentsAndRooms, loading, error } = useAppContext()
+  const { apartments, rooms, furnitures, fetchApartmentsAndRooms, loading, error } = useAppContext()
 
   const [formData, setFormData] = useState<FormData>({
     name: '',
@@ -26,7 +26,7 @@ const RoomPage: React.FC = () => {
   });
 
   useEffect(() => {
-    if (apartments.length > 0) {
+    if (apartments && apartments.length > 0) {
       const formattedApartments = apartments.map((apartment) => ({
         id: apartment.id.toString(),
         label: apartment.name,
@@ -36,7 +36,10 @@ const RoomPage: React.FC = () => {
         apartmentsData: formattedApartments,
       }));
     }
-  }, [rooms]);
+  }, [apartments]);
+
+  const roomsWithApartments = rooms || [];
+  const furnituresWithRooms = furnitures || [];
 
   const change = (key: keyof FormData) => (event: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
     const value = event.target.value;
@@ -173,20 +176,20 @@ const RoomPage: React.FC = () => {
     <div>
       <Navigation />
       <h2>Room Page</h2>
-      {apartments.length > 0 ? (
+      {apartments && apartments.length > 0 ? (
         <div>
           <button onClick={() => setModalData({ addingFurnitureToRoom: false, isOpen: true, roomId: '', })}>Add Room</button>
           <ul>
-            {rooms.map((item) => (
+            {roomsWithApartments.map((item) => (
               <li key={item.id}>
                 <p>Name: {item.name}</p>
-                <p>Apartment: {item.Apartment.name}</p>
+                <p>Apartment: {item.name}</p>
                 <button onClick={() => handleAddFurniture(item.id.toString())}>Add Furniture</button>
                 <button onClick={() => handleDelete(item.id)}>Delete</button>
 
-                {item.Furniture && item.Furniture.length > 0 && (
+                {item && (
                   <ul>
-                    {item.Furniture.map((furnitureItem) => (
+                    {furnituresWithRooms.map((furnitureItem) => (
                       <li key={furnitureItem.id}>
                         <p>Furniture: {furnitureItem.name}</p>
                       </li>
@@ -207,7 +210,7 @@ const RoomPage: React.FC = () => {
           isOpen={modalData.isOpen}
           onClose={() => setModalData({ addingFurnitureToRoom: false, isOpen: false, roomId: '', })}
           selectedId={formData.apartmentId}
-          dropdownData={apartments}
+          dropdownData={apartments || []}
           handleChange={handleChange}
           handleSubmit={handleSubmit}
           IdError={formData.IdError}

@@ -10,7 +10,7 @@ import { useAppContext } from '../Context/AppContext';
 
 
 const FurniturePage: React.FC = () => {
-  const { furniture, rooms, fetchApartmentsAndRooms, loading, error } = useAppContext()
+  const { rooms, furnitures, fetchApartmentsAndRooms, loading, error } = useAppContext();
 
   const [formData, setFormData] = useState<FormData>({
     name: '',
@@ -27,8 +27,9 @@ const FurniturePage: React.FC = () => {
     addingFurnitureToRoom: false,
   });
 
+
   useEffect(() => {
-    if (rooms.length > 0) {
+    if (rooms && rooms.length > 0) {
       const formattedRooms = rooms.map((room) => ({
         id: room.id.toString(),
         label: room.name,
@@ -133,21 +134,22 @@ const FurniturePage: React.FC = () => {
     return <div>Error: {error.message}</div>;
   }
 
+
   return (
     <div>
       <Navigation />
       <h2>Furniture Page</h2>
-      {rooms.length > 0 ? (
+      {rooms && rooms.length > 0 ? (
         <div>
           <button onClick={() => setModalData((prevModalData) => ({ ...prevModalData, isOpen: true }))}>
             Add Furniture
           </button>
           <ul>
-            {furniture.map((item) => (
+            {furnitures?.map((item) => (
               <li key={item.id}>
                 <p>Furniture: {item.name}</p>
                 <p>Model: {item.model}</p>
-                <p>Room: {item.Room.name}</p>
+                <p>Room: {item.roomId}</p>
                 <button onClick={() => handleDelete(item.id)}>Delete</button>
                 <h1>------------------------------------------</h1>
               </li>
@@ -163,7 +165,7 @@ const FurniturePage: React.FC = () => {
           isOpen={modalData.isOpen}
           onClose={() => setModalData((prevModalData) => ({ ...prevModalData, isOpen: false }))}
           selectedId={formData.roomId}
-          dropdownData={rooms}
+          dropdownData={rooms || []}
           handleChange={handleChange}
           handleSubmit={handleSubmit}
           IdError={formData.IdError}
