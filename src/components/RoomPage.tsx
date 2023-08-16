@@ -2,15 +2,12 @@ import React, { useEffect, useMemo, useState } from 'react';
 import axios from 'axios';
 import Modal from './Modal';
 import Navigation from './Navigation';
-import Room from '../Types/Room';
-import Apartment from '../Types/Apartment';
 import { FormData } from '../Types/Room';
 import { ModalData } from '../Types/Room';
+import { useAppContext } from '../Context/AppContext';
 
 const RoomPage: React.FC = () => {
-  const [room, setRoom] = useState<Room[]>([]);
-  const [error, setError] = useState<Error | null>(null);
-  const [loading, setLoading] = useState<boolean>(true);
+  const { apartments, rooms, fetchApartmentsAndRooms, loading, error } = useAppContext()
 
   const [formData, setFormData] = useState<FormData>({
     name: '',
@@ -29,30 +26,17 @@ const RoomPage: React.FC = () => {
   });
 
   useEffect(() => {
-    const fetchData = async () => {
-      setLoading(true);
-      try {
-        const [roomsResponse, apartmentResponse] = await Promise.all([
-          axios.get<Room[]>('http://localhost:4000/rooms/'),
-          axios.get<Apartment[]>('http://localhost:4000/apartments/'),
-        ]);
-
-        setRoom(roomsResponse.data);
-
-        const apartmentsData = apartmentResponse.data;
-
-        setFormData((prevData) => ({
-          ...prevData,
-          apartmentsData,
-        }));
-      } catch (error) {
-        setError(error as Error);
-      }
-      setLoading(false);
-    };
-
-    fetchData();
-  }, []);
+    if (apartments.length > 0) {
+      const formattedApartments = apartments.map((apartment) => ({
+        id: apartment.id.toString(),
+        label: apartment.name,
+      }));
+      setFormData((prevData) => ({
+        ...prevData,
+        apartmentsData: formattedApartments,
+      }));
+    }
+  }, [rooms]);
 
   const change = (key: keyof FormData) => (event: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
     const value = event.target.value;
@@ -96,7 +80,7 @@ const RoomPage: React.FC = () => {
   const handleDelete = async (id: number) => {
     try {
       await axios.delete(`http://localhost:4000/rooms/${id}`);
-      setRoom((prevRooms) => prevRooms.filter((item) => item.id !== id));
+      fetchApartmentsAndRooms();
     } catch (error) {
       console.log('Error deleting rooms:', error);
     }
@@ -189,11 +173,11 @@ const RoomPage: React.FC = () => {
     <div>
       <Navigation />
       <h2>Room Page</h2>
-      {formData.apartmentsData.length > 0 ? (
+      {apartments.length > 0 ? (
         <div>
           <button onClick={() => setModalData({ addingFurnitureToRoom: false, isOpen: true, roomId: '', })}>Add Room</button>
           <ul>
-            {room.map((item) => (
+            {rooms.map((item) => (
               <li key={item.id}>
                 <p>Name: {item.name}</p>
                 <p>Apartment: {item.Apartment.name}</p>
@@ -223,7 +207,7 @@ const RoomPage: React.FC = () => {
           isOpen={modalData.isOpen}
           onClose={() => setModalData({ addingFurnitureToRoom: false, isOpen: false, roomId: '', })}
           selectedId={formData.apartmentId}
-          dropdownData={formData.apartmentsData}
+          dropdownData={apartments}
           handleChange={handleChange}
           handleSubmit={handleSubmit}
           IdError={formData.IdError}

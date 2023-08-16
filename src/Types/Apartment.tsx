@@ -17,7 +17,7 @@ export interface FormData {
     nameError: string;
     modelError: string;
     IdError: string;
-    floorsData: Floor[];
+    floorsData: { id: string; label: string }[];
 }
 
 export interface ModalData {

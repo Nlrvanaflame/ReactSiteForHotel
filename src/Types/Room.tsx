@@ -19,7 +19,7 @@ export interface FormData {
     nameError: string;
     modelError: string;
     IdError: string;
-    apartmentsData: Apartment[];
+    apartmentsData: { id: string; label: string }[];
 }
 
 export interface ModalData {

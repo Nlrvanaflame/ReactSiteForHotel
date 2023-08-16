@@ -6,11 +6,10 @@ import Hotel from '../Types/Hotel'
 import Floor from '../Types/Floor';
 import { ModalData } from '../Types/Floor';
 import { FormData } from '../Types/Floor';
+import { useAppContext } from '../Context/AppContext';
 
 const FloorPage: React.FC = () => {
-  const [floor, setFloors] = useState<Floor[]>([]);
-  const [error, setError] = useState<Error | null>(null);
-  const [loading, setLoading] = useState<boolean>(true);
+  const { hotels, floors, fetchApartmentsAndRooms, loading, error } = useAppContext()
 
   const [formData, setFormData] = useState<FormData>({
     name: '',
@@ -27,29 +26,17 @@ const FloorPage: React.FC = () => {
   });
 
   useEffect(() => {
-    const fetchData = async () => {
-      setLoading(true);
-      try {
-        const [floorsResponse, hotelResponse] = await Promise.all([
-          axios.get<Floor[]>('http://localhost:4000/floors/'),
-          axios.get<Hotel[]>('http://localhost:4000/hotels/'),
-        ]);
-
-        setFloors(floorsResponse.data);
-
-        const hotelsData = hotelResponse.data;
-        setFormData((prevData) => ({
-          ...prevData,
-          hotelsData,
-        }));
-      } catch (error) {
-        setError(error as Error);
-      }
-      setLoading(false);
-    };
-
-    fetchData();
-  }, []);
+    if (hotels.length > 0) {
+      const formattedFloors = floors.map((floor) => ({
+        id: floor.id.toString(),
+        label: floor.name,
+      }));
+      setFormData((prevData) => ({
+        ...prevData,
+        roomsData: formattedFloors,
+      }));
+    }
+  }, [floors]);
 
   const change = (key: keyof FormData) => (event: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
     const value = event.target.value;
@@ -97,7 +84,7 @@ const FloorPage: React.FC = () => {
   const handleDelete = async (id: number) => {
     try {
       await axios.delete(`http://localhost:4000/floors/${id}`);
-      setFloors((prevFloors) => prevFloors.filter((item) => item.id !== id));
+      fetchApartmentsAndRooms();
     } catch (error) {
       console.log('Error deleting floor:', error);
     }
@@ -161,11 +148,11 @@ const FloorPage: React.FC = () => {
     <div>
       <Navigation />
       <h2>Floor Page</h2>
-      {formData.hotelsData.length > 0 ? (
+      {hotels.length > 0 ? (
         <div>
           <button onClick={() => setModalData({ addingFurnitureToRoom: false, isOpen: true, floorId: '' })}>Add Floor</button>
           <ul>
-            {floor.map((item) => (
+            {floors.map((item) => (
               <li key={item.id}>
                 <p>Name: {item.name}</p>
                 <p>Hotel: {item.Hotel.name}</p>
@@ -195,7 +182,7 @@ const FloorPage: React.FC = () => {
           isOpen={modalData.isOpen}
           onClose={() => setModalData({ ...modalData, addingFurnitureToRoom: false, isOpen: false })}
           selectedId={formData.hotelId}
-          dropdownData={formData.hotelsData}
+          dropdownData={hotels}
           handleChange={handleChange}
           handleSubmit={handleSubmit}
           IdError={formData.IdError}

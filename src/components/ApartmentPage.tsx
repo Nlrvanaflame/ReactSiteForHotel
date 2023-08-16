@@ -2,15 +2,12 @@ import React, { useEffect, useMemo, useState } from 'react';
 import axios from 'axios';
 import Modal from './Modal';
 import Navigation from './Navigation';
-import Apartment from '../Types/Apartment'
-import Floor from '../Types/Floor';
 import { FormData } from '../Types/Apartment';
 import { ModalData } from '../Types/Apartment';
+import { useAppContext } from '../Context/AppContext';
 
 const ApartmentPage: React.FC = () => {
-  const [apartment, setApartments] = useState<Apartment[]>([]);
-  const [error, setError] = useState<Error | null>(null);
-  const [loading, setLoading] = useState<boolean>(true);
+  const { apartments, floors, fetchApartmentsAndRooms, loading, error } = useAppContext()
 
   const [formData, setFormData] = useState<FormData>({
     name: '',
@@ -31,29 +28,17 @@ const ApartmentPage: React.FC = () => {
   });
 
   useEffect(() => {
-    const fetchData = async () => {
-      setLoading(true);
-      try {
-        const [floorsResponse, apartmentResponse] = await Promise.all([
-          axios.get<Floor[]>('http://localhost:4000/floors/'),
-          axios.get<Apartment[]>('http://localhost:4000/apartments/'),
-        ]);
-
-        setApartments(apartmentResponse.data);
-
-        const floorsData = floorsResponse.data;
-        setFormData((prevData) => ({
-          ...prevData,
-          floorsData,
-        }));
-      } catch (error) {
-        setError(error as Error);
-      }
-      setLoading(false);
-    };
-
-    fetchData();
-  }, []);
+    if (floors.length > 0) {
+      const formattedApartments = apartments.map((apartment) => ({
+        id: apartment.id.toString(),
+        label: apartment.name,
+      }));
+      setFormData((prevData) => ({
+        ...prevData,
+        roomsData: formattedApartments,
+      }));
+    }
+  }, [apartments]);
 
   const change = (key: keyof FormData) => (event: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
     const value = event.target.value;
@@ -95,7 +80,7 @@ const ApartmentPage: React.FC = () => {
   const handleDelete = async (id: number) => {
     try {
       await axios.delete(`http://localhost:4000/apartments/${id}`);
-      setApartments((prevApartments) => prevApartments.filter((item) => item.id !== id));
+      fetchApartmentsAndRooms()
     } catch (error) {
       console.log('Error deleting apartment:', error);
     }
@@ -177,7 +162,8 @@ const ApartmentPage: React.FC = () => {
             apartmentId: '',
             roomId: ''
           });
-          window.location.reload();
+          setFormData((prevData) => ({ ...prevData, name: '', model: '' }));
+          fetchApartmentsAndRooms()
         } catch (error) {
           console.error('Error adding apartment:', error);
         }
@@ -194,7 +180,8 @@ const ApartmentPage: React.FC = () => {
             apartmentId: '',
             roomId: ''
           });
-          window.location.reload();
+          setFormData((prevData) => ({ ...prevData, name: '', model: '' }));
+          fetchApartmentsAndRooms()
         } catch (error) {
           console.error('Error adding room:', error);
         }
@@ -213,7 +200,8 @@ const ApartmentPage: React.FC = () => {
           apartmentId: '',
           roomId: '',
         });
-        window.location.reload();
+        setFormData((prevData) => ({ ...prevData, name: '', model: '' }));
+        fetchApartmentsAndRooms()
       } catch (error) {
         console.error('Error adding furniture:', error);
       }
@@ -232,11 +220,11 @@ const ApartmentPage: React.FC = () => {
     <div>
       <Navigation />
       <h2>Apartment Page</h2>
-      {formData.floorsData.length > 0 ? (
+      {floors.length > 0 ? (
         <div>
           <button onClick={() => setModalData({ addingFurnitureToRoom: false, adding2: false, isOpen: true, apartmentId: "", roomId: "" })}>Add Apartment</button>
           <ul>
-            {apartment.map((item) => (
+            {apartments.map((item) => (
               <li key={item.id}>
                 <p>Name: {item.name}</p>
                 <p>Floor: {item.Floor.name}</p>
@@ -280,7 +268,7 @@ const ApartmentPage: React.FC = () => {
           isOpen={modalData.isOpen}
           onClose={() => setModalData({ ...modalData, addingFurnitureToRoom: false, isOpen: false })}
           selectedId={formData.floorId}
-          dropdownData={formData.floorsData}
+          dropdownData={floors}
           handleChange={change('floorId')}
           handleSubmit={handleSubmit}
           IdError={formData.IdError}

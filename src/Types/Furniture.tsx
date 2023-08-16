@@ -16,7 +16,7 @@ export interface FormData {
     nameError: string;
     modelError: string;
     IdError: string;
-    roomsData: Room[];
+    roomsData: { id: string; label: string }[];
 }
 
 export interface ModalData {

@@ -15,7 +15,7 @@ export interface FormData {
     hotelId: string;
     nameError: string;
     IdError: string;
-    hotelsData: Hotel[];
+    hotelsData: { id: string; label: string }[];
 }
 
 export interface ModalData {
