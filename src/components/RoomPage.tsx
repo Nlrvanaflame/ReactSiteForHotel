@@ -80,12 +80,27 @@ const RoomPage: React.FC = () => {
     ];
   }, [formData, handleNameChange, handleModel, modalData.addingFurnitureToRoom]);
 
+
+  const findApartmentName = (apartmentId: number) => {
+    const apartment = apartments?.find(apartment => apartment.id === apartmentId);
+    return apartment ? apartment.name : '';
+  };
+
   const handleDelete = async (id: number) => {
     try {
       await axios.delete(`http://localhost:4000/rooms/${id}`);
       fetchApartmentsAndRooms();
     } catch (error) {
       console.log('Error deleting rooms:', error);
+    }
+  };
+
+  const handleDeleteFurniture = async (id: number) => {
+    try {
+      await axios.delete(`http://localhost:4000/furniture/${id}`);
+      fetchApartmentsAndRooms();
+    } catch (error) {
+      console.log('Error deleting furniture:', error);
     }
   };
 
@@ -180,20 +195,23 @@ const RoomPage: React.FC = () => {
         <div>
           <button onClick={() => setModalData({ addingFurnitureToRoom: false, isOpen: true, roomId: '', })}>Add Room</button>
           <ul>
-            {roomsWithApartments.map((item) => (
+            {rooms?.map((item) => (
               <li key={item.id}>
                 <p>Name: {item.name}</p>
-                <p>Apartment: {item.name}</p>
+                <p>Apartment: {findApartmentName(item.apartmentId)}</p>
                 <button onClick={() => handleAddFurniture(item.id.toString())}>Add Furniture</button>
                 <button onClick={() => handleDelete(item.id)}>Delete</button>
 
                 {item && (
                   <ul>
-                    {furnituresWithRooms.map((furnitureItem) => (
-                      <li key={furnitureItem.id}>
-                        <p>Furniture: {furnitureItem.name}</p>
-                      </li>
-                    ))}
+                    {furnitures && furnitures
+                      .filter(furnitureItem => furnitureItem.roomId === item.id)
+                      .map((furnitureItem) => (
+                        <li key={furnitureItem.id}>
+                          <p>Furniture: {furnitureItem.name}</p>
+                          <button onClick={() => handleDeleteFurniture(furnitureItem.id)}>Delete</button>
+                        </li>
+                      ))}
                   </ul>
                 )}
                 <h1>------------------------------------------</h1>

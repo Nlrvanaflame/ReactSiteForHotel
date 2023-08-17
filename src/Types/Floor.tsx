@@ -4,6 +4,7 @@ import Hotel from "./Hotel";
 interface Floor {
     id: number;
     name: string;
+    hotelId: number;
     Hotel: {
         name: string;
     };

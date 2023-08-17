@@ -54,14 +54,12 @@ const AppProvider: React.FC<AppProviderProps> = ({ children }) => {
 
             setAppData(appDataResponse.data)
 
-            console.log("appdata resp is here", appDataResponse.data)
-
-            console.log("Furniture data fetched:", appDataResponse.data.furnitures);
         } catch (error) {
             setError(error as Error);
         }
         setLoading(false);
     };
+    console.log('sdfewsf', appData)
 
     useEffect(() => {
         fetchApartmentsAndRooms();

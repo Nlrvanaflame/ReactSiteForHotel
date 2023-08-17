@@ -40,9 +40,6 @@ const ApartmentPage: React.FC = () => {
     }
   }, [apartments]);
 
-  const aprtmentsWithFloors = apartments || [];
-  const roomsWithApartments = rooms || [];
-  const furnituresWithRooms = furnitures || [];
 
   const change = (key: keyof FormData) => (event: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
     const value = event.target.value;
@@ -80,6 +77,11 @@ const ApartmentPage: React.FC = () => {
       },
     ];
   }, [formData, handleNameChange]);
+
+  const findFloorName = (floorId: number) => {
+    const floor = floors?.find(floor => floor.id === floorId);
+    return floor ? floor.name : '';
+  };
 
   const handleDelete = async (id: number) => {
     try {
@@ -228,34 +230,37 @@ const ApartmentPage: React.FC = () => {
         <div>
           <button onClick={() => setModalData({ addingFurnitureToRoom: false, adding2: false, isOpen: true, apartmentId: "", roomId: "" })}>Add Apartment</button>
           <ul>
-            {aprtmentsWithFloors.map((item) => (
+            {apartments?.map((item) => (
               <li key={item.id}>
                 <p>Name: {item.name}</p>
-                <p>Floor: {item.name}</p>
+                <p>Floor: {findFloorName(item.floorId)}</p>
                 <button onClick={() => handleAddRoom(item.id.toString())}>Add Room</button>
                 <button onClick={() => handleDelete(item.id)}>Delete</button>
 
                 {item && (
                   <ul>
-                    {roomsWithApartments.map((roomItem) => (
-                      <li key={roomItem.id}>
-                        <p>Rooms: {roomItem.name}</p>
-                        <button onClick={() => handleAddFurniture(roomItem.id.toString())}>Add Furniture</button>
-                        <button onClick={() => handleDeleteRoom(roomItem.id)}>Delete</button>
+                    {rooms && rooms
+                      .filter(roomItem => roomItem.apartmentId === item.id)
+                      .map((roomItem) => (
+                        <li key={roomItem.id}>
+                          <p>Rooms: {roomItem.name}</p>
+                          <button onClick={() => handleAddFurniture(roomItem.id.toString())}>Add Furniture</button>
+                          <button onClick={() => handleDeleteRoom(roomItem.id)}>Delete</button>
 
-
-                        {roomItem && (
-                          <ul>
-                            {furnituresWithRooms.map((furnitureItem) => (
-                              <li key={furnitureItem.id}>
-                                <p>Furniture: {furnitureItem.name}</p>
-                                <button onClick={() => handleDeleteFurniture(furnitureItem.id)}>Delete</button>
-                              </li>
-                            ))}
-                          </ul>
-                        )}
-                      </li>
-                    ))}
+                          {roomItem && (
+                            <ul>
+                              {furnitures && furnitures
+                                .filter(furnitureItem => furnitureItem.roomId === roomItem.id)
+                                .map((furnitureItem) => (
+                                  <li key={furnitureItem.id}>
+                                    <p>Furniture: {furnitureItem.name}</p>
+                                    <button onClick={() => handleDeleteFurniture(furnitureItem.id)}>Delete</button>
+                                  </li>
+                                ))}
+                            </ul>
+                          )}
+                        </li>
+                      ))}
                   </ul>
                 )}
                 <h1>------------------------------------------</h1>

@@ -4,6 +4,7 @@ import Floor from "./Floor";
 interface Apartment {
     id: number;
     name: string;
+    floorId: number;
     Floor: {
         name: string;
     };

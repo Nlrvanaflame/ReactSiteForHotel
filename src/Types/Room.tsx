@@ -3,6 +3,7 @@ import Apartment from "./Apartment";
 interface Room {
     id: number;
     name: string;
+    apartmentId: number;
     Apartment: {
         name: string;
     };
