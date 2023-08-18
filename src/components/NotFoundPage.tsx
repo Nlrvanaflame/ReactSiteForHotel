@@ -1,4 +1,4 @@
-import React from 'react';
+import React from 'react'
 
 const NotFoundPage: React.FC = () => {
   return (
@@ -6,7 +6,7 @@ const NotFoundPage: React.FC = () => {
       <h1>GOLQM PROBLEM</h1>
       <p>Otide konq u rekata.</p>
     </div>
-  );
-};
+  )
+}
 
-export default NotFoundPage;
+export default NotFoundPage

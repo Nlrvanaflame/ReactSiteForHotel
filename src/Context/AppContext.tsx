@@ -1,132 +1,138 @@
+import React, { createContext, useContext, useEffect, useState, useMemo } from 'react'
+import axios from 'axios'
 
-
-
-import React, { createContext, useContext, useEffect, useState } from 'react';
-import axios from 'axios';
-
-import Floor from '../Types/Floor';
-import Apartment from '../Types/Apartment';
-import Room from '../Types/Room';
-import Furniture from '../Types/Furniture';
-import Hotel from '../Types/Hotel';
-
+import Floor from '../Types/Floor'
+import Apartment from '../Types/Apartment'
+import Room from '../Types/Room'
+import Furniture from '../Types/Furniture'
+import Hotel from '../Types/Hotel'
 
 interface AppData {
-    hotels?: Hotel[];
-    floors?: Floor[];
-    apartments?: Apartment[];
-    rooms?: Room[];
-    furnitures?: Furniture[];
+  hotels?: Hotel[]
+  floors?: Floor[]
+  apartments?: Apartment[]
+  rooms?: Room[]
+  furnitures?: Furniture[]
 }
 
 interface AppContextType extends AppData {
-
-    setHotels: (hotels: Hotel[]) => void;
-    setFloors: (floors: Floor[]) => void;
-    setApartments: (apartments: Apartment[]) => void;
-    setRooms: (rooms: Room[]) => void;
-    setFurniture: (furnitures: Furniture[]) => void;
-    fetchApartmentsAndRooms: () => void;
-    loading: boolean;
-    error: Error | null;
+  setHotels: (hotels: Hotel[]) => void
+  setFloors: (floors: Floor[]) => void
+  setApartments: (apartments: Apartment[]) => void
+  setRooms: (rooms: Room[]) => void
+  setFurniture: (furnitures: Furniture[]) => void
+  fetchApartmentsAndRooms: () => void
+  loading: boolean
+  error: Error | null
+  roomsMap: {
+    [key: number]: Room[]
+  }
 }
 interface AppProviderProps {
-    children: React.ReactNode;
+  children: React.ReactNode
 }
 
-
-
-const AppContext = createContext<AppContextType | undefined>(undefined);
+const AppContext = createContext<AppContextType | undefined>(undefined)
 
 const AppProvider: React.FC<AppProviderProps> = ({ children }) => {
+  const [appData, setAppData] = useState<AppData>({})
+  const [loading, setLoading] = useState<boolean>(true)
+  const [error, setError] = useState<Error | null>(null)
 
+  const fetchApartmentsAndRooms = async () => {
+    setLoading(true)
+    try {
+      const [appDataResponse] = await Promise.all([
+        axios.get<AppData>('http://localhost:4000/alldata/')
+      ])
 
-    const [appData, setAppData] = useState<AppData>({});
-    const [loading, setLoading] = useState<boolean>(true);
-    const [error, setError] = useState<Error | null>(null);
+      setAppData(appDataResponse.data)
+    } catch (error) {
+      setError(error as Error)
+    }
+    setLoading(false)
+  }
+  console.log('sdfewsf', appData)
 
-    const fetchApartmentsAndRooms = async () => {
-        setLoading(true);
-        try {
-            const [appDataResponse] = await Promise.all([
-                axios.get<AppData>('http://localhost:4000/alldata/'),
-            ]);
+  useEffect(() => {
+    fetchApartmentsAndRooms()
+  }, [])
 
-            setAppData(appDataResponse.data)
+  const roomsMap: { [key: number]: Room[] } = useMemo(() => {
+    const roomsMap: { [key: number]: Room[] } = {}
+    appData.rooms?.forEach((room) => {
+      // roomsMap[room.id]=room
+      if (roomsMap[room.apartmentId]) {
+        roomsMap[room.apartmentId].push(room)
+      } else {
+        roomsMap[room.apartmentId] = [room]
+      }
+    })
+    return roomsMap
+  }, [appData])
 
-        } catch (error) {
-            setError(error as Error);
+  // console.log("idCache    ", idCache)
+
+  // console.log("apartments", appData.apartments)
+
+  const contextValue: AppContextType = {
+    setHotels: (hotels: Hotel[]) => {
+      setAppData((old) => {
+        return {
+          ...old,
+          hotels
         }
-        setLoading(false);
-    };
-    console.log('sdfewsf', appData)
+      })
+    },
+    setFloors: (floors: Floor[]) => {
+      setAppData((old) => {
+        return {
+          ...old,
+          floors
+        }
+      })
+    },
+    setApartments: (apartments: Apartment[]) => {
+      setAppData((old) => {
+        return {
+          ...old,
+          apartments
+        }
+      })
+    },
+    setRooms: (rooms: Room[]) => {
+      setAppData((old) => {
+        return {
+          ...old,
+          rooms
+        }
+      })
+    },
+    setFurniture: (furnitures: Furniture[]) => {
+      console.log('Setting furniture data:', furnitures)
+      setAppData((old) => {
+        return {
+          ...old,
+          furnitures
+        }
+      })
+    },
+    ...appData,
+    fetchApartmentsAndRooms,
+    loading,
+    error,
+    roomsMap
+  }
 
-    useEffect(() => {
-        fetchApartmentsAndRooms();
-    }, []);
-
-
-
-
-
-
-    const contextValue: AppContextType = {
-        setHotels: (hotels: Hotel[]) => {
-            setAppData((old) => {
-                return {
-                    ...old,
-                    hotels,
-                }
-            })
-        },
-        setFloors: (floors: Floor[]) => {
-            setAppData((old) => {
-                return {
-                    ...old,
-                    floors,
-                }
-            })
-        },
-        setApartments: (apartments: Apartment[]) => {
-            setAppData((old) => {
-                return {
-                    ...old,
-                    apartments
-                }
-            })
-        },
-        setRooms: (rooms: Room[]) => {
-            setAppData((old) => {
-                return {
-                    ...old,
-                    rooms,
-                }
-            })
-        },
-        setFurniture: (furnitures: Furniture[]) => {
-            console.log("Setting furniture data:", furnitures);
-            setAppData((old) => {
-                return {
-                    ...old,
-                    furnitures,
-                }
-            })
-        },
-        ...appData,
-        fetchApartmentsAndRooms,
-        loading,
-        error
-    };
-
-    return <AppContext.Provider value={contextValue}>{children}</AppContext.Provider>;
-};
+  return <AppContext.Provider value={contextValue}>{children}</AppContext.Provider>
+}
 
 const useAppContext = () => {
-    const context = useContext(AppContext);
-    if (context === undefined) {
-        throw new Error('useAppContext must be used within an AppProvider');
-    }
-    return context;
-};
+  const context = useContext(AppContext)
+  if (context === undefined) {
+    throw new Error('useAppContext must be used within an AppProvider')
+  }
+  return context
+}
 
-export { AppProvider, useAppContext };
+export { AppProvider, useAppContext }

@@ -1,16 +1,13 @@
-import React, { useEffect, useMemo, useState } from 'react';
-import axios from "axios";
-import Modal from './Modal';
-import Navigation from './Navigation';
-import { FormData } from '../Types/Furniture';
-import { ModalData } from '../Types/Furniture';
-import { useAppContext } from '../Context/AppContext';
-
-
-
+import React, { useEffect, useMemo, useState } from 'react'
+import axios from 'axios'
+import Modal from './Modal'
+import Navigation from './Navigation'
+import { FormData } from '../Types/Furniture'
+import { ModalData } from '../Types/Furniture'
+import { useAppContext } from '../Context/AppContext'
 
 const FurniturePage: React.FC = () => {
-  const { rooms, furnitures, fetchApartmentsAndRooms, loading, error } = useAppContext();
+  const { rooms, furnitures, fetchApartmentsAndRooms, loading, error } = useAppContext()
 
   const [formData, setFormData] = useState<FormData>({
     name: '',
@@ -20,120 +17,116 @@ const FurniturePage: React.FC = () => {
     modelError: '',
     IdError: '',
     roomsData: []
-  });
+  })
 
   const [modalData, setModalData] = useState<ModalData>({
     isOpen: false,
-    addingFurnitureToRoom: false,
-  });
-
+    addingFurnitureToRoom: false
+  })
 
   useEffect(() => {
     if (rooms && rooms.length > 0) {
       const formattedRooms = rooms.map((room) => ({
         id: room.id.toString(),
-        label: room.name,
-      }));
+        label: room.name
+      }))
       setFormData((prevData) => ({
         ...prevData,
-        roomsData: formattedRooms,
-      }));
+        roomsData: formattedRooms
+      }))
     }
-  }, [rooms]);
+  }, [rooms])
 
-  const change = (key: keyof FormData) => (
-    event: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>
-  ) => {
-    const value = event.target.value;
-    setFormData({
-      ...formData,
-      [key]: value,
-    });
-  };
+  const change =
+    (key: keyof FormData) => (event: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
+      const value = event.target.value
+      setFormData({
+        ...formData,
+        [key]: value
+      })
+    }
 
-
-  const handleChange = change("roomId");
-  const handleModel = change('model');
-  const handleNameChange = change('name');
+  const handleChange = change('roomId')
+  const handleModel = change('model')
+  const handleNameChange = change('name')
 
   const inputs = useMemo(() => {
     return [
       {
-        title: "Name",
+        title: 'Name',
         value: formData.name,
         changeValue: handleNameChange,
-        error: formData.nameError,
+        error: formData.nameError
       },
       {
-        title: "Model",
+        title: 'Model',
         value: formData.model,
         changeValue: handleModel,
-        error: formData.modelError,
-      },
-    ];
-  }, [formData, handleNameChange, handleModel]);
+        error: formData.modelError
+      }
+    ]
+  }, [formData, handleNameChange, handleModel])
 
   const validateForm = () => {
-    const { name, model, roomId } = formData;
-    let isValid = true;
+    const { name, model, roomId } = formData
+    let isValid = true
 
     if (!name.trim()) {
-      setFormData((prevData) => ({ ...prevData, nameError: 'Name is required' }));
-      isValid = false;
+      setFormData((prevData) => ({ ...prevData, nameError: 'Name is required' }))
+      isValid = false
     } else {
-      setFormData((prevData) => ({ ...prevData, nameError: '' }));
+      setFormData((prevData) => ({ ...prevData, nameError: '' }))
     }
 
     if (!model.trim()) {
-      setFormData((prevData) => ({ ...prevData, modelError: 'Model is required' }));
-      isValid = false;
+      setFormData((prevData) => ({ ...prevData, modelError: 'Model is required' }))
+      isValid = false
     } else {
-      setFormData((prevData) => ({ ...prevData, modelError: '' }));
+      setFormData((prevData) => ({ ...prevData, modelError: '' }))
     }
 
     if (!roomId) {
-      setFormData((prevData) => ({ ...prevData, IdError: 'Please select a room' }));
-      isValid = false;
+      setFormData((prevData) => ({ ...prevData, IdError: 'Please select a room' }))
+      isValid = false
     } else {
-      setFormData((prevData) => ({ ...prevData, IdError: '' }));
+      setFormData((prevData) => ({ ...prevData, IdError: '' }))
     }
 
-    return isValid;
-  };
+    return isValid
+  }
 
   const handleDelete = async (id: number) => {
     try {
-      await axios.delete(`http://localhost:4000/furniture/${id}`);
-      fetchApartmentsAndRooms();
+      await axios.delete(`http://localhost:4000/furniture/${id}`)
+      fetchApartmentsAndRooms()
     } catch (error) {
-      console.log('Error deleting furniture:', error);
+      console.log('Error deleting furniture:', error)
     }
-  };
+  }
 
   const handleSubmit = async (event: React.FormEvent) => {
-    event.preventDefault();
+    event.preventDefault()
 
-    const { name, model, roomId } = formData;
+    const { name, model, roomId } = formData
 
     if (validateForm()) {
       try {
-        await axios.post('http://localhost:4000/furniture/', { name, model, roomId });
-        setModalData((prevModalData) => ({ ...prevModalData, isOpen: false }));
-        window.location.reload();
+        await axios.post('http://localhost:4000/furniture/', { name, model, roomId })
+        setModalData((prevModalData) => ({ ...prevModalData, isOpen: false }))
+        window.location.reload()
       } catch (error) {
-        console.error('Error adding furniture:', error);
+        console.error('Error adding furniture:', error)
       }
     }
-  };
+  }
 
   if (loading) {
-    return <div>Loading...</div>;
+    return <div>Loading...</div>
   }
 
   if (error) {
-    return <div>Error: {error.message}</div>;
+    return <div>Error: {error.message}</div>
   }
-
 
   return (
     <div>
@@ -141,7 +134,9 @@ const FurniturePage: React.FC = () => {
       <h2>Furniture Page</h2>
       {rooms && rooms.length > 0 ? (
         <div>
-          <button onClick={() => setModalData((prevModalData) => ({ ...prevModalData, isOpen: true }))}>
+          <button
+            onClick={() => setModalData((prevModalData) => ({ ...prevModalData, isOpen: true }))}
+          >
             Add Furniture
           </button>
           <ul>
@@ -174,7 +169,7 @@ const FurniturePage: React.FC = () => {
         />
       )}
     </div>
-  );
-};
+  )
+}
 
-export default FurniturePage;
+export default FurniturePage

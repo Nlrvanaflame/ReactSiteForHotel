@@ -1,6 +1,6 @@
 interface Hotel {
-    id: number;
-    name: string;
+  id: number
+  name: string
 }
 
-export default Hotel;
+export default Hotel

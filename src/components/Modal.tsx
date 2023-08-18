@@ -1,22 +1,22 @@
-import React, { ChangeEvent, FC, FormEvent } from 'react';
+import React, { ChangeEvent, FC, FormEvent } from 'react'
 
 interface Input {
-  title: string;
-  value: string;
-  changeValue: (event: ChangeEvent<HTMLInputElement>) => void;
-  error: string;
+  title: string
+  value: string
+  changeValue: (event: ChangeEvent<HTMLInputElement>) => void
+  error: string
 }
 
 interface ModalProps {
-  isOpen: boolean;
-  onClose: () => void;
-  selectedId: string;
-  dropdownData: { id: number; name: string }[];
-  handleChange: (event: ChangeEvent<HTMLSelectElement>) => void;
-  handleSubmit: (event: FormEvent) => void;
-  IdError: string;
-  addingFurnitureToRoom: boolean;
-  inputs: Input[];
+  isOpen: boolean
+  onClose: () => void
+  selectedId: string
+  dropdownData: { id: number; name: string }[]
+  handleChange: (event: ChangeEvent<HTMLSelectElement>) => void
+  handleSubmit: (event: FormEvent) => void
+  IdError: string
+  addingFurnitureToRoom: boolean
+  inputs: Input[]
 }
 
 const Modal: FC<ModalProps> = ({
@@ -28,10 +28,10 @@ const Modal: FC<ModalProps> = ({
   handleSubmit,
   IdError,
   addingFurnitureToRoom,
-  inputs,
+  inputs
 }) => {
   if (!isOpen) {
-    return null;
+    return null
   }
 
   return (
@@ -71,7 +71,7 @@ const Modal: FC<ModalProps> = ({
         </button>
       </form>
     </div>
-  );
-};
+  )
+}
 
-export default Modal;
+export default Modal
