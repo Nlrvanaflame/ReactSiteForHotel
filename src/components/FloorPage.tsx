@@ -64,6 +64,11 @@ const FloorPage: React.FC = () => {
     ]
   }, [formData, handleNameChange])
 
+  const findHotelName = (hotelId: number) => {
+    const hotel = hotels?.find((hotel) => hotel.id === hotelId)
+    return hotel ? hotel.name : ''
+  }
+
   const validateForm = () => {
     const { name, hotelId } = formData
     let isValid = true
@@ -117,7 +122,7 @@ const FloorPage: React.FC = () => {
             addingFurnitureToRoom: false,
             floorId: ''
           })
-          window.location.reload()
+          fetchApartmentsAndRooms()
         } catch (error) {
           console.error('Error adding floor:', error)
         }
@@ -132,7 +137,7 @@ const FloorPage: React.FC = () => {
             addingFurnitureToRoom: false,
             floorId: ''
           })
-          window.location.reload()
+          fetchApartmentsAndRooms()
         } catch (error) {
           console.error('Error adding apartment:', error)
         }
@@ -162,10 +167,10 @@ const FloorPage: React.FC = () => {
             Add Floor
           </button>
           <ul>
-            {floorsWithHotels.map((item) => (
+            {floors?.map((item) => (
               <li key={item.id}>
                 <p>Name: {item.name}</p>
-                <p>Hotel: {item.name}</p>
+                <p>Hotel: {findHotelName(item.hotelId)}</p>
                 <button onClick={() => handleAddApartment(item.id.toString())}>
                   Add Apartment
                 </button>

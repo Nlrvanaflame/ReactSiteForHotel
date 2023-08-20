@@ -24,8 +24,14 @@ interface AppContextType extends AppData {
   fetchApartmentsAndRooms: () => void
   loading: boolean
   error: Error | null
+  furnitureMap: {
+    [key: number]: Furniture[]
+  }
   roomsMap: {
     [key: number]: Room[]
+  }
+  apartmentsMap: {
+    [key: number]: Apartment[]
   }
 }
 interface AppProviderProps {
@@ -58,10 +64,21 @@ const AppProvider: React.FC<AppProviderProps> = ({ children }) => {
     fetchApartmentsAndRooms()
   }, [])
 
+  const furnitureMap: { [key: number]: Furniture[] } = useMemo(() => {
+    const furnitureMap: { [key: number]: Furniture[] } = {}
+    appData.furnitures?.forEach((furniture) => {
+      if (furnitureMap[furniture.roomId]) {
+        furnitureMap[furniture.roomId].push(furniture)
+      } else {
+        furnitureMap[furniture.roomId] = [furniture]
+      }
+    })
+    return furnitureMap
+  }, [appData])
+
   const roomsMap: { [key: number]: Room[] } = useMemo(() => {
     const roomsMap: { [key: number]: Room[] } = {}
     appData.rooms?.forEach((room) => {
-      // roomsMap[room.id]=room
       if (roomsMap[room.apartmentId]) {
         roomsMap[room.apartmentId].push(room)
       } else {
@@ -71,9 +88,17 @@ const AppProvider: React.FC<AppProviderProps> = ({ children }) => {
     return roomsMap
   }, [appData])
 
-  // console.log("idCache    ", idCache)
-
-  // console.log("apartments", appData.apartments)
+  const apartmentsMap: { [key: number]: Apartment[] } = useMemo(() => {
+    const apartmentsMap: { [key: number]: Apartment[] } = {}
+    appData.apartments?.forEach((apartment) => {
+      if (apartmentsMap[apartment.floorId]) {
+        apartmentsMap[apartment.floorId].push(apartment)
+      } else {
+        apartmentsMap[apartment.floorId] = [apartment]
+      }
+    })
+    return apartmentsMap
+  }, [appData])
 
   const contextValue: AppContextType = {
     setHotels: (hotels: Hotel[]) => {
@@ -121,7 +146,9 @@ const AppProvider: React.FC<AppProviderProps> = ({ children }) => {
     fetchApartmentsAndRooms,
     loading,
     error,
-    roomsMap
+    furnitureMap,
+    roomsMap,
+    apartmentsMap
   }
 
   return <AppContext.Provider value={contextValue}>{children}</AppContext.Provider>

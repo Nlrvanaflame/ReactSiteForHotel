@@ -7,7 +7,8 @@ import { ModalData } from '../Types/Room'
 import { useAppContext } from '../Context/AppContext'
 
 const RoomPage: React.FC = () => {
-  const { apartments, rooms, furnitures, fetchApartmentsAndRooms, loading, error } = useAppContext()
+  const { apartments, rooms, furnitureMap, fetchApartmentsAndRooms, loading, error } =
+    useAppContext()
 
   const [formData, setFormData] = useState<FormData>({
     name: '',
@@ -38,9 +39,6 @@ const RoomPage: React.FC = () => {
     }
   }, [apartments])
 
-  const roomsWithApartments = rooms || []
-  const furnituresWithRooms = furnitures || []
-
   const change =
     (key: keyof FormData) => (event: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
       const value = event.target.value
@@ -49,9 +47,6 @@ const RoomPage: React.FC = () => {
         [key]: value
       })
     }
-
-  const handleChange = change('apartmentId')
-  const handleModel = change('model')
   const handleNameChange = change('name')
 
   const inputs = useMemo(() => {
@@ -66,7 +61,7 @@ const RoomPage: React.FC = () => {
         {
           title: 'Model',
           value: formData.model,
-          changeValue: handleModel,
+          changeValue: change('model'),
           error: formData.modelError
         }
       ]
@@ -79,7 +74,7 @@ const RoomPage: React.FC = () => {
         error: formData.nameError
       }
     ]
-  }, [formData, handleNameChange, handleModel, modalData.addingFurnitureToRoom])
+  }, [formData, handleNameChange, modalData.addingFurnitureToRoom])
 
   const findApartmentName = (apartmentId: number) => {
     const apartment = apartments?.find((apartment) => apartment.id === apartmentId)
@@ -155,7 +150,8 @@ const RoomPage: React.FC = () => {
             addingFurnitureToRoom: false,
             roomId: ''
           })
-          window.location.reload()
+          setFormData((prevData) => ({ ...prevData, name: '' }))
+          fetchApartmentsAndRooms()
         } catch (error) {
           console.error('Error adding room:', error)
         }
@@ -175,7 +171,8 @@ const RoomPage: React.FC = () => {
             addingFurnitureToRoom: false,
             roomId: ''
           })
-          window.location.reload()
+          setFormData((prevData) => ({ ...prevData, name: '', model: '' }))
+          fetchApartmentsAndRooms()
         } catch (error) {
           console.error('Error adding furniture:', error)
         }
@@ -214,17 +211,15 @@ const RoomPage: React.FC = () => {
 
                 {item && (
                   <ul>
-                    {furnitures &&
-                      furnitures
-                        .filter((furnitureItem) => furnitureItem.roomId === item.id)
-                        .map((furnitureItem) => (
-                          <li key={furnitureItem.id}>
-                            <p>Furniture: {furnitureItem.name}</p>
-                            <button onClick={() => handleDeleteFurniture(furnitureItem.id)}>
-                              Delete
-                            </button>
-                          </li>
-                        ))}
+                    {furnitureMap[item.id] &&
+                      furnitureMap[item.id].map((furnitureItem) => (
+                        <li key={furnitureItem.id}>
+                          <p>Furniture: {furnitureItem.name}</p>
+                          <button onClick={() => handleDeleteFurniture(furnitureItem.id)}>
+                            Delete
+                          </button>
+                        </li>
+                      ))}
                   </ul>
                 )}
                 <h1>------------------------------------------</h1>
@@ -242,7 +237,7 @@ const RoomPage: React.FC = () => {
           onClose={() => setModalData({ addingFurnitureToRoom: false, isOpen: false, roomId: '' })}
           selectedId={formData.apartmentId}
           dropdownData={apartments || []}
-          handleChange={handleChange}
+          handleChange={change('apartmentId')}
           handleSubmit={handleSubmit}
           IdError={formData.IdError}
           addingFurnitureToRoom={modalData.addingFurnitureToRoom}

@@ -10,9 +10,9 @@ const ApartmentPage: React.FC = () => {
   const {
     apartments,
     floors,
-    rooms,
     furnitures,
     roomsMap,
+    furnitureMap,
     fetchApartmentsAndRooms,
     loading,
     error
@@ -104,7 +104,7 @@ const ApartmentPage: React.FC = () => {
   const handleDeleteRoom = async (id: number) => {
     try {
       await axios.delete(`http://localhost:4000/rooms/${id}`)
-      window.location.reload()
+      fetchApartmentsAndRooms()
     } catch (error) {
       console.log('Error deleting room:', error)
     }
@@ -113,7 +113,7 @@ const ApartmentPage: React.FC = () => {
   const handleDeleteFurniture = async (id: number) => {
     try {
       await axios.delete(`http://localhost:4000/furniture/${id}`)
-      window.location.reload()
+      fetchApartmentsAndRooms()
     } catch (error) {
       console.log('Error furniture room:', error)
     }
@@ -272,19 +272,15 @@ const ApartmentPage: React.FC = () => {
 
                           {roomItem && (
                             <ul>
-                              {furnitures &&
-                                furnitures
-                                  .filter((furnitureItem) => furnitureItem.roomId === roomItem.id)
-                                  .map((furnitureItem) => (
-                                    <li key={furnitureItem.id}>
-                                      <p>Furniture: {furnitureItem.name}</p>
-                                      <button
-                                        onClick={() => handleDeleteFurniture(furnitureItem.id)}
-                                      >
-                                        Delete
-                                      </button>
-                                    </li>
-                                  ))}
+                              {furnitureMap[item.id] &&
+                                furnitureMap[item.id].map((furnitureItem) => (
+                                  <li key={furnitureItem.id}>
+                                    <p>Furniture: {furnitureItem.name}</p>
+                                    <button onClick={() => handleDeleteFurniture(furnitureItem.id)}>
+                                      Delete
+                                    </button>
+                                  </li>
+                                ))}
                             </ul>
                           )}
                         </li>
