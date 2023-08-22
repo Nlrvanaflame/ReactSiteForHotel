@@ -1,6 +1,7 @@
 import React, { useEffect, useMemo, useState } from 'react'
 import axios from 'axios'
 import Modal from './Modal'
+import DeleteModal from './ModalDelete'
 import Navigation from './Navigation'
 import { FormData } from '../Types/Room'
 import { ModalData } from '../Types/Room'
@@ -23,7 +24,10 @@ const RoomPage: React.FC = () => {
   const [modalData, setModalData] = useState<ModalData>({
     isOpen: false,
     addingFurnitureToRoom: false,
-    roomId: ''
+    roomId: '',
+    deleteModalOpen: false,
+    itemToDelete: null,
+    type: null
   })
 
   useEffect(() => {
@@ -81,26 +85,34 @@ const RoomPage: React.FC = () => {
     return apartment ? apartment.name : ''
   }
 
-  const handleDelete = async (id: number) => {
-    try {
-      await axios.delete(`http://localhost:4000/rooms/${id}`)
-      fetchApartmentsAndRooms()
-    } catch (error) {
-      console.log('Error deleting rooms:', error)
-    }
+  const handleDeleteOpen = (type: 'apartment' | 'room' | 'furniture', id: number) => {
+    setModalData((prevModalData) => ({
+      ...prevModalData,
+      deleteModalOpen: true,
+      itemToDelete: id,
+      type: type
+    }))
   }
 
-  const handleDeleteFurniture = async (id: number) => {
-    try {
-      await axios.delete(`http://localhost:4000/furniture/${id}`)
-      fetchApartmentsAndRooms()
-    } catch (error) {
-      console.log('Error deleting furniture:', error)
+  const handleDeleteConfirm = async () => {
+    if (modalData.itemToDelete !== null) {
+      try {
+        if (modalData.type === 'room') {
+          await axios.delete(`http://localhost:4000/rooms/${modalData.itemToDelete}`)
+        } else if (modalData.type === 'furniture') {
+          await axios.delete(`http://localhost:4000/furniture/${modalData.itemToDelete}`)
+        }
+        fetchApartmentsAndRooms()
+      } catch (error) {
+        console.log(`Error deleting ${modalData.type}:`, error)
+      }
     }
+    setModalData((prevModalData) => ({ ...prevModalData, deleteModalOpen: false }))
   }
 
   const handleAddFurniture = (roomId: string) => {
     setModalData({
+      ...modalData,
       isOpen: true,
       addingFurnitureToRoom: true,
       roomId: roomId
@@ -146,6 +158,7 @@ const RoomPage: React.FC = () => {
         try {
           await axios.post('http://localhost:4000/rooms/', { name, apartmentId })
           setModalData({
+            ...modalData,
             isOpen: false,
             addingFurnitureToRoom: false,
             roomId: ''
@@ -167,6 +180,7 @@ const RoomPage: React.FC = () => {
           })
 
           setModalData({
+            ...modalData,
             isOpen: false,
             addingFurnitureToRoom: false,
             roomId: ''
@@ -195,7 +209,14 @@ const RoomPage: React.FC = () => {
       {apartments && apartments.length > 0 ? (
         <div>
           <button
-            onClick={() => setModalData({ addingFurnitureToRoom: false, isOpen: true, roomId: '' })}
+            onClick={() =>
+              setModalData({
+                ...modalData,
+                addingFurnitureToRoom: false,
+                isOpen: true,
+                roomId: ''
+              })
+            }
           >
             Add Room
           </button>
@@ -207,7 +228,7 @@ const RoomPage: React.FC = () => {
                 <button onClick={() => handleAddFurniture(item.id.toString())}>
                   Add Furniture
                 </button>
-                <button onClick={() => handleDelete(item.id)}>Delete</button>
+                <button onClick={() => handleDeleteOpen('room', item.id)}>Delete Room</button>
 
                 {item && (
                   <ul>
@@ -215,8 +236,8 @@ const RoomPage: React.FC = () => {
                       furnitureMap[item.id].map((furnitureItem) => (
                         <li key={furnitureItem.id}>
                           <p>Furniture: {furnitureItem.name}</p>
-                          <button onClick={() => handleDeleteFurniture(furnitureItem.id)}>
-                            Delete
+                          <button onClick={() => handleDeleteOpen('furniture', furnitureItem.id)}>
+                            Delete Furniture
                           </button>
                         </li>
                       ))}
@@ -234,7 +255,9 @@ const RoomPage: React.FC = () => {
       {modalData.isOpen && (
         <Modal
           isOpen={modalData.isOpen}
-          onClose={() => setModalData({ addingFurnitureToRoom: false, isOpen: false, roomId: '' })}
+          onClose={() =>
+            setModalData({ ...modalData, addingFurnitureToRoom: false, isOpen: false })
+          }
           selectedId={formData.apartmentId}
           dropdownData={apartments || []}
           handleChange={change('apartmentId')}
@@ -244,6 +267,15 @@ const RoomPage: React.FC = () => {
           inputs={inputs}
         />
       )}
+
+      <DeleteModal
+        isOpen={modalData.deleteModalOpen}
+        type={modalData.type}
+        onClose={() =>
+          setModalData((prevModalData) => ({ ...prevModalData, deleteModalOpen: false }))
+        }
+        onConfirm={handleDeleteConfirm}
+      />
     </div>
   )
 }

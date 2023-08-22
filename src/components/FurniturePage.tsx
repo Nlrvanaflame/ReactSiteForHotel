@@ -1,6 +1,7 @@
 import React, { useEffect, useMemo, useState } from 'react'
 import axios from 'axios'
 import Modal from './Modal'
+import DeleteModal from './ModalDelete'
 import Navigation from './Navigation'
 import { FormData } from '../Types/Furniture'
 import { ModalData } from '../Types/Furniture'
@@ -21,7 +22,9 @@ const FurniturePage: React.FC = () => {
 
   const [modalData, setModalData] = useState<ModalData>({
     isOpen: false,
-    addingFurnitureToRoom: false
+    addingFurnitureToRoom: false,
+    deleteModalOpen: false,
+    furnitureToDelete: null
   })
 
   useEffect(() => {
@@ -67,6 +70,11 @@ const FurniturePage: React.FC = () => {
     ]
   }, [formData, handleNameChange, handleModel])
 
+  const findRoomName = (roomId: number) => {
+    const room = rooms?.find((room) => room.id === roomId)
+    return room ? room.name : ''
+  }
+
   const validateForm = () => {
     const { name, model, roomId } = formData
     let isValid = true
@@ -95,13 +103,24 @@ const FurniturePage: React.FC = () => {
     return isValid
   }
 
-  const handleDelete = async (id: number) => {
-    try {
-      await axios.delete(`http://localhost:4000/furniture/${id}`)
-      fetchApartmentsAndRooms()
-    } catch (error) {
-      console.log('Error deleting furniture:', error)
+  const handleDeleteOpen = (id: number) => {
+    setModalData((prevModalData) => ({
+      ...prevModalData,
+      deleteModalOpen: true,
+      furnitureToDelete: id
+    }))
+  }
+
+  const handleDeleteConfirm = async () => {
+    if (modalData.furnitureToDelete !== null) {
+      try {
+        await axios.delete(`http://localhost:4000/furniture/${modalData.furnitureToDelete}`)
+        fetchApartmentsAndRooms()
+      } catch (error) {
+        console.log('Error deleting furniture:', error)
+      }
     }
+    setModalData((prevModalData) => ({ ...prevModalData, deleteModalOpen: false }))
   }
 
   const handleSubmit = async (event: React.FormEvent) => {
@@ -144,8 +163,8 @@ const FurniturePage: React.FC = () => {
               <li key={item.id}>
                 <p>Furniture: {item.name}</p>
                 <p>Model: {item.model}</p>
-                <p>Room: {item.roomId}</p>
-                <button onClick={() => handleDelete(item.id)}>Delete</button>
+                <p>Room: {findRoomName(item.roomId)}</p>
+                <button onClick={() => handleDeleteOpen(item.id)}>Delete</button>
                 <h1>------------------------------------------</h1>
               </li>
             ))}
@@ -168,6 +187,15 @@ const FurniturePage: React.FC = () => {
           inputs={inputs}
         />
       )}
+
+      <DeleteModal
+        isOpen={modalData.deleteModalOpen}
+        type={'furniture'}
+        onClose={() =>
+          setModalData((prevModalData) => ({ ...prevModalData, deleteModalOpen: false }))
+        }
+        onConfirm={handleDeleteConfirm}
+      />
     </div>
   )
 }

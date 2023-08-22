@@ -27,6 +27,9 @@ export interface ModalData {
   isOpen: boolean
   addingFurnitureToRoom: boolean
   roomId: string
+  deleteModalOpen: boolean
+  itemToDelete: number | null
+  type: 'apartment' | 'room' | 'furniture' | null
 }
 
 export default Room

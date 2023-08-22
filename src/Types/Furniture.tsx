@@ -23,6 +23,8 @@ export interface FormData {
 export interface ModalData {
   isOpen: boolean
   addingFurnitureToRoom: boolean
+  deleteModalOpen: boolean
+  furnitureToDelete: number | null
 }
 
 export default Furniture

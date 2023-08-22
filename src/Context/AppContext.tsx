@@ -64,40 +64,31 @@ const AppProvider: React.FC<AppProviderProps> = ({ children }) => {
     fetchApartmentsAndRooms()
   }, [])
 
-  const furnitureMap: { [key: number]: Furniture[] } = useMemo(() => {
-    const furnitureMap: { [key: number]: Furniture[] } = {}
-    appData.furnitures?.forEach((furniture) => {
-      if (furnitureMap[furniture.roomId]) {
-        furnitureMap[furniture.roomId].push(furniture)
+  const convert = <T, K extends keyof T>(array: T[], property: K): { [key: number]: T[] } => {
+    const resultObj: { [key: number]: T[] } = {}
+
+    array?.forEach((item) => {
+      const keyValue = Number(item[property])
+      if (resultObj[keyValue]) {
+        resultObj[keyValue].push(item)
       } else {
-        furnitureMap[furniture.roomId] = [furniture]
+        resultObj[keyValue] = [item]
       }
     })
-    return furnitureMap
+
+    return resultObj
+  }
+
+  const furnitureMap: { [key: number]: Furniture[] } = useMemo(() => {
+    return convert<Furniture, 'roomId'>(appData.furnitures || [], 'roomId')
   }, [appData])
 
   const roomsMap: { [key: number]: Room[] } = useMemo(() => {
-    const roomsMap: { [key: number]: Room[] } = {}
-    appData.rooms?.forEach((room) => {
-      if (roomsMap[room.apartmentId]) {
-        roomsMap[room.apartmentId].push(room)
-      } else {
-        roomsMap[room.apartmentId] = [room]
-      }
-    })
-    return roomsMap
+    return convert<Room, 'apartmentId'>(appData.rooms || [], 'apartmentId')
   }, [appData])
 
   const apartmentsMap: { [key: number]: Apartment[] } = useMemo(() => {
-    const apartmentsMap: { [key: number]: Apartment[] } = {}
-    appData.apartments?.forEach((apartment) => {
-      if (apartmentsMap[apartment.floorId]) {
-        apartmentsMap[apartment.floorId].push(apartment)
-      } else {
-        apartmentsMap[apartment.floorId] = [apartment]
-      }
-    })
-    return apartmentsMap
+    return convert<Apartment, 'floorId'>(appData.apartments || [], 'floorId')
   }, [appData])
 
   const contextValue: AppContextType = {
