@@ -13,8 +13,10 @@ const FloorPage: React.FC = () => {
 
   const [formData, setFormData] = useState<FormData>({
     name: '',
+    model: '',
     hotelId: '',
     nameError: '',
+    modelError: '',
     IdError: '',
     hotelsData: []
   })

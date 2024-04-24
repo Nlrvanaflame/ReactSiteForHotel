@@ -13,8 +13,10 @@ interface Floor {
 
 export interface FormData {
   name: string
+  model: string
   hotelId: string
   nameError: string
+  modelError: string
   IdError: string
   hotelsData: { id: string; label: string }[]
 }
